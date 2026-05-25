@@ -14,22 +14,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @jakarta.validation.constraints.NotBlank(message = "Tên đăng nhập không được để trống")
+    @jakarta.validation.constraints.NotBlank(message = "Vui lòng nhập tên đăng nhập của bạn")
     @Column(nullable = false, unique = true)
     private String username;
 
-    @jakarta.validation.constraints.Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
+    @jakarta.validation.constraints.Size(min = 6, message = "Mật khẩu cần tối thiểu 6 ký tự để đảm bảo an toàn")
     @Column(nullable = false)
     private String password;
 
-    @jakarta.validation.constraints.Email(message = "Email không hợp lệ")
+    @jakarta.validation.constraints.Email(message = "Địa chỉ email không đúng định dạng (Ví dụ: name@example.com)")
     @Column(unique = true)
     private String email;
 
     private String otpCode;
     private java.time.LocalDateTime otpExpiry;
 
-    @jakarta.validation.constraints.Pattern(regexp = "^[0-9]*$", message = "Số điện thoại chỉ được chứa chữ số")
+    @jakarta.validation.constraints.Pattern(regexp = "^(0|\\+84)(\\s|\\.)?((3[2-9])|(5[689])|(7[06-9])|(8[1-689])|(9[0-46-9]))(\\d)(\\s|\\.)?(\\d{3})(\\s|\\.)?(\\d{3})$", 
+            message = "Số điện thoại không đúng định dạng (Ví dụ: 0912345678)")
     private String phone;
     private String fullName;
     private String gender;

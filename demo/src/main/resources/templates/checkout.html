@@ -49,17 +49,18 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label small fw-bold">Họ và tên người nhận <span class="text-danger">*</span></label>
                                         <input type="text" id="inputFullName" name="fullName" class="form-control rounded-3 border-success-subtle" 
-                                               th:value="${fullName}" required placeholder="">
+                                               th:value="${fullName}" required placeholder="Ví dụ: Nguyễn Văn A">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label small fw-bold">Số điện thoại <span class="text-danger">*</span></label>
                                         <input type="tel" id="inputPhone" name="phone" class="form-control rounded-3 border-success-subtle" 
-                                               th:value="${phone}" required placeholder="">
+                                               th:value="${phone}" required placeholder="Số điện thoại gồm 10 chữ số">
                                     </div>
                                     <div class="col-12 mb-4" id="addressField">
                                         <label class="form-label small fw-bold">Địa chỉ nhận hàng chi tiết <span class="text-danger">*</span></label>
                                         <textarea id="inputAddress" name="shippingAddress" class="form-control rounded-3 border-success-subtle" 
-                                                  rows="3" th:text="${address}" required></textarea>
+                                                  rows="3" th:text="${address}" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
+                                        <div class="form-text text-muted" style="font-size: 0.7rem;">Cung cấp địa chỉ rõ ràng giúp chúng tôi giao hàng nhanh hơn.</div>
                                     </div>
                                 </div>
                             </div>
