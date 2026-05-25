@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        .product-card { border: none; transition: 0.3s; border-radius: 12px !important; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+        .price-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .size-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; cursor: pointer; }
+        .size-btn.active { background: var(--pl-green); color: white; border-color: var(--pl-green); }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar: Category Tree -->
+            <div class="col-lg-3 mb-4">
+                <div class="category-sidebar p-3 shadow-sm rounded bg-white border-0">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2" style="color: var(--pl-green);">DANH MỤC</h5>
+                    <div class="category-tree">
+                        <div class="category-item mb-3">
+                            <a th:href="@{/menu}" class="text-decoration-none fw-bold" th:classappend="${selectedCategory == null ? 'text-success' : 'text-dark'}">
+                                <i class="fas fa-th-large me-2"></i> Tất cả sản phẩm
+                            </a>
+                        </div>
+                        
+                        <div th:each="cat : ${categories}" th:if="${cat.parentCategory == null}" class="category-parent mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="javascript:void(0)" 
+                                   class="text-decoration-none fw-semibold text-dark" 
+                                   style="cursor: default; pointer-events: none;"
+                                   th:text="${cat.name}">Danh mục cha</a>
+                            </div>
+                            
+                            <div class="category-children ms-3 mt-2">
+                                <div th:each="subCat : ${categories}" th:if="${subCat.parentCategory != null and subCat.parentCategory.id == cat.id}" class="mb-2">
+                                    <a th:href="@{'/category/' + ${subCat.id}}" 
+                                       class="text-decoration-none small text-secondary" 
+                                       th:classappend="${selectedCategory != null and selectedCategory.id == subCat.id ? 'text-success fw-bold' : ''}"
+                                       th:text="${subCat.name}">Danh mục con</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Display Area -->
+            <div class="col-lg-9">
+                <div class="text-center mb-5">
+                    <h3 class="fw-bold section-title text-uppercase" th:text="${query != null ? 'Kết quả tìm kiếm: ' + query : (selectedCategory != null ? selectedCategory.name : 'TẤT CẢ MENU')}">MENU</h3>
+                    <div class="mx-auto mt-2" style="width: 60px; height: 3px; background-color: var(--pl-green);"></div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-6 col-md-4 col-lg-4" th:each="product : ${products}">
+                        <div class="product-card text-center h-100 d-flex flex-column p-3 shadow-sm">
+                            <a th:href="@{'/product/' + ${product.id}}" class="text-decoration-none flex-grow-1">
+                                <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://phuclong.com.vn/uploads/dish/6620f4c93f0b35-trasuaphuclong.png'}" class="product-img mb-3" alt="Product Image" style="max-height: 180px; object-fit: contain;">
+                                <h6 class="card-title text-dark fw-bold" th:text="${product.name}">Tên sản phẩm</h6>
+                            </a>
+                            
+                            <!-- Size & Price Preview -->
+                            <div class="price-container">
+                                <div class="price-toggle" th:if="${product.priceM != null or product.priceL != null}">
+                                    <span class="size-btn active" th:if="${product.priceM != null}"
+                                          th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                          onclick="updatePrice(this)">M</span>
+                                    <span class="size-btn" th:if="${product.priceL != null}" 
+                                          th:classappend="${product.priceM == null ? 'active' : ''}"
+                                          th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                          onclick="updatePrice(this)">L</span>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="text-muted text-decoration-line-through small me-2" 
+                                          th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}"
+                                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span>
+                                    <span class="price text-success fw-bold" 
+                                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span>
+                                </div>
+                            </div>
+
+                            <form th:action="@{/cart/add}" method="post">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <button type="submit" class="btn btn-success w-100 rounded-pill py-2 shadow-sm" 
+                                        th:disabled="${product.calculatedStock <= 0}"
+                                        th:text="${product.calculatedStock > 0 ? 'ĐẶT HÀNG' : 'HẾT HÀNG'}">ĐẶT HÀNG</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div th:if="${products.empty}" class="col-12 text-center py-5">
+                        <p class="text-muted">Không tìm thấy sản phẩm nào phù hợp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePrice(element) {
+            const container = element.closest('.price-container');
+            const priceText = element.getAttribute('data-price');
+            container.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            container.querySelector('.price').innerText = priceText;
+        }
+
+        // Remember scroll position
+        document.addEventListener('DOMContentLoaded', function() {
+            const scrollPos = localStorage.getItem('menuScrollPos');
+            if (scrollPos) {
+                window.scrollTo(0, parseInt(scrollPos));
+                localStorage.removeItem('menuScrollPos');
+            }
+
+            const forms = document.querySelectorAll('form[action="/cart/add"]');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    localStorage.setItem('menuScrollPos', window.scrollY);
+                });
+            });
+        });
+    </script>
+    <style>
+        .category-sidebar { position: sticky; top: 100px; border-radius: 15px !important; }
+        .category-tree a { transition: 0.2s; }
+        .category-tree a:hover { color: var(--pl-green) !important; padding-left: 5px; }
+    </style>
+</div>
+</body>
+</html>

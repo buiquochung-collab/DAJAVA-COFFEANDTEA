@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${news.title}">Chi tiết bản tin</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/}" class="text-success text-decoration-none">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/promotions}" class="text-success text-decoration-none">Tin tức</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+                    </ol>
+                </nav>
+
+                <div class="news-content bg-white p-4 p-md-5 shadow-sm rounded-4">
+                    <div class="mb-4">
+                        <span class="badge bg-success-subtle text-success px-3 py-2 mb-3">TIN TỨC MỚI</span>
+                        <h1 class="fw-bold mb-3" th:text="${news.title}">Tiêu đề bản tin</h1>
+                        <div class="text-muted small">
+                            <i class="far fa-calendar-alt me-1"></i> Đăng lúc: 
+                            <span th:text="${#temporals.format(news.createdAt, 'HH:mm dd/MM/yyyy')}">Date</span>
+                        </div>
+                    </div>
+
+                    <img th:src="${news.imageUrl}" class="img-fluid rounded-4 mb-5 w-100 shadow-sm" alt="News Image">
+
+                    <div class="content-body" style="line-height: 1.8; text-align: justify; white-space: pre-line;">
+                        <p th:text="${news.content}">Nội dung bài viết...</p>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-top">
+                        <p class="fw-bold text-success mb-0">Tea & Coffee & Tea</p>
+                        <p class="small text-muted">Hương vị đậm đà, quà tặng yêu thương.</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a th:href="@{/promotions}" class="btn btn-outline-success px-4 rounded-pill fw-bold">
+                        <i class="fas fa-chevron-left me-2"></i> QUAY LẠI
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

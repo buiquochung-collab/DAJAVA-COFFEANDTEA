@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Chính sách bảo mật | Tea & Coffee</title>
+    <style>
+        .policy-content h4 {
+            color: #006a31;
+            font-weight: bold;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .policy-content p, .policy-content li {
+            line-height: 1.6;
+            color: #444;
+        }
+        .policy-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-success">CHÍNH SÁCH BẢO MẬT</h1>
+            <p class="text-muted">Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn tại Tea & Coffee.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10 policy-content">
+                <div class="card policy-card bg-light p-4 mb-4">
+                    <h4>1. Thu thập thông tin</h4>
+                    <p>Chúng tôi thu thập thông tin khi bạn đăng ký tài khoản, đặt hàng hoặc đăng ký nhận tin nhắn khuyến mãi. Thông tin bao gồm tên, địa chỉ, số điện thoại và email.</p>
+                    
+                    <h4>2. Sử dụng thông tin</h4>
+                    <p>Thông tin của bạn được sử dụng để:</p>
+                    <ul>
+                        <li>Xử lý đơn hàng và giao hàng nhanh chóng.</li>
+                        <li>Cải thiện dịch vụ khách hàng và trải nghiệm mua sắm.</li>
+                        <li>Gửi thông báo về các chương trình ưu đãi, khuyến mãi.</li>
+                    </ul>
+
+                    <h4>3. Bảo mật thông tin</h4>
+                    <p>Chúng tôi triển khai các biện pháp an ninh để bảo vệ thông tin cá nhân của bạn. Dữ liệu thanh toán được xử lý thông qua các cổng thanh toán an toàn và không lưu trữ trên máy chủ của chúng tôi.</p>
+
+                    <h4>4. Cam kết</h4>
+                    <p>Tea & Coffee cam kết không bán, trao đổi hoặc chuyển giao thông tin cá nhân của bạn cho bên thứ ba vì mục đích thương mại.</p>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <p class="small text-muted mb-4">Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ: <strong>1900 123 456</strong></p>
+                    <a th:href="@{/}" class="btn btn-success px-5 py-3 rounded-pill fw-bold shadow">QUAY LẠI TRANG CHỦ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý đánh giá | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Quản lý phản hồi & Đánh giá</h2>
+        <div class="text-muted small">Tổng số: <span class="fw-bold text-dark" th:text="${#lists.size(reviews)}">0</span> lượt đánh giá</div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Khách hàng</th>
+                        <th>Xếp hạng</th>
+                        <th>Nội dung phản hồi</th>
+                        <th>Ngày gửi</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="review : ${reviews}">
+                        <td class="ps-4">
+                            <div class="fw-bold text-success" th:text="${review.product.name}">Product</div>
+                        </td>
+                        <td>
+                            <div class="small fw-bold" th:text="${review.user.fullName ?: review.user.username}">User</div>
+                        </td>
+                        <td>
+                            <div class="text-warning small">
+                                <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                                   th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small text-muted" th:text="${review.comment}" style="max-width: 250px; white-space: normal;">Comment</div>
+                        </td>
+                        <td class="small" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy')}">Date</td>
+                        <td>
+                            <span class="badge rounded-pill" 
+                                  th:classappend="${review.status == 'APPROVED' ? 'bg-success-subtle text-success' : (review.status == 'PENDING' ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary')}"
+                                  th:text="${review.status == 'APPROVED' ? 'Hiển thị' : (review.status == 'PENDING' ? 'Chờ duyệt' : 'Đã ẩn')}">APPROVED</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <form th:action="@{/admin/reviews/status}" method="post" class="d-inline">
+                                <input type="hidden" name="id" th:value="${review.id}">
+                                <select name="status" class="form-select form-select-sm d-inline-block w-auto rounded-pill border shadow-sm small" onchange="this.form.submit()">
+                                    <option value="PENDING" th:selected="${review.status == 'PENDING'}">Duyệt sau</option>
+                                    <option value="APPROVED" th:selected="${review.status == 'APPROVED'}">Công khai</option>
+                                    <option value="HIDDEN" th:selected="${review.status == 'HIDDEN'}">Ẩn tin</option>
+                                </select>
+                            </form>
+                            <a th:href="@{'/admin/reviews/delete/' + ${review.id}}" class="btn btn-sm btn-outline-danger rounded-circle ms-1 shadow-sm" onclick="return confirm('Xóa vĩnh viễn đánh giá này?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${reviews.isEmpty()}">
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-comment-slash fa-4x mb-3 opacity-10"></i>
+                            <p>Chưa có bất kỳ đánh giá nào từ phía khách hàng.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

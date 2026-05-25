@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý sản phẩm | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Quản lý sản phẩm</h2>
+        <div class="d-flex gap-2">
+            <div class="text-muted small align-self-center me-3">Tổng số: <span class="fw-bold text-dark" th:text="${#lists.size(products)}">0</span> món</div>
+            <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#productModal" onclick="resetForm()">
+                <i class="fas fa-plus me-2"></i>THÊM SẢN PHẨM
+            </button>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá bán (M/L)</th>
+                        <th>Loại kho</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="prod : ${products}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <img th:src="${prod.imageUrl}" class="rounded-3 me-3" width="50" height="50" style="object-fit: cover;">
+                                <div>
+                                    <div class="fw-bold text-dark" th:text="${prod.name}">Product Name</div>
+                                    <div th:if="${prod.promotion != null}" class="badge bg-danger-subtle text-danger" style="font-size: 0.6rem;">
+                                        KM: <span th:text="${prod.promotion.name}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark rounded-pill border" th:text="${prod.category.name}">Category</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(prod.priceM, 0, 'COMMA', 0, 'POINT')} + 'đ'"></div>
+                            <div class="small text-muted" th:if="${prod.priceL != null}" th:text="${#numbers.formatDecimal(prod.priceL, 0, 'COMMA', 0, 'POINT')} + 'đ (Size L)'"></div>
+                        </td>
+                        <td>
+                            <span th:if="${prod.isRecipeBased}" class="badge bg-info-subtle text-info rounded-pill">🧪 Công thức</span>
+                            <span th:unless="${prod.isRecipeBased}" class="badge bg-secondary-subtle text-secondary rounded-pill">📦 Trực tiếp</span>
+                        </td>
+                        <td>
+                            <div th:if="${prod.isRecipeBased}" class="small">
+                                <span class="fw-bold" th:text="${@inventoryService.getCalculatedStock(prod)}">0</span> ly
+                            </div>
+                            <div th:unless="${prod.isRecipeBased}" class="small">
+                                <span class="fw-bold" th:text="${prod.stock}">0</span> cái
+                            </div>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <a th:if="${prod.isRecipeBased}" th:href="@{'/admin/recipes/' + ${prod.id}}" class="btn btn-sm btn-outline-warning rounded-circle shadow-sm" title="Cấu hình Công thức">
+                                <i class="fas fa-flask"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-primary rounded-circle ms-1 shadow-sm" 
+                                    th:attr="data-id=${prod.id}, data-name=${prod.name}, data-pricem=${prod.priceM}, data-pricel=${prod.priceL}, data-catid=${prod.category != null ? prod.category.id : ''}, data-imageurl=${prod.imageUrl}, data-desc=${prod.description}, data-stock=${prod.stock != null ? prod.stock : 0}, data-isrecipe=${prod.isRecipeBased}, data-promoid=${prod.promotion != null ? prod.promotion.id : ''}"
+                                    onclick="editProd(this)"
+                                    data-bs-toggle="modal" data-bs-target="#productModal" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a th:href="@{'/admin/products/delete/' + ${prod.id}}" class="btn btn-sm btn-outline-danger rounded-circle ms-1 shadow-sm" onclick="return confirm('Xóa sản phẩm này?')" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form th:action="@{/admin/products/save}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header bg-dark text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold" id="modalTitle">Thêm sản phẩm mới</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="id" id="prod-id">
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-bold">Tên sản phẩm</label>
+                                <input type="text" name="name" id="prod-name" class="form-control rounded-pill" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold">Danh mục</label>
+                                <select name="categoryId" id="prod-catId" class="form-select rounded-pill" required>
+                                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Giá Size M (hoặc giá gốc)</label>
+                                <input type="number" name="priceM" id="prod-priceM" class="form-control rounded-pill" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Giá Size L (tùy chọn)</label>
+                                <input type="number" name="priceL" id="prod-priceL" class="form-control rounded-pill">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Chương trình Khuyến mãi</label>
+                                <select name="promotionId" id="prod-promoId" class="form-select rounded-pill">
+                                    <option value="">-- Không có --</option>
+                                    <option th:each="promo : ${promotions}" th:value="${promo.id}" th:text="${promo.name}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Hình ảnh sản phẩm</label>
+                                <input type="file" name="imageFile" class="form-control rounded-pill shadow-sm">
+                                <input type="hidden" name="imageUrl" id="prod-imageUrl">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Loại sản phẩm</label>
+                                <select name="isRecipeBased" id="prod-isRecipe" class="form-select rounded-pill" onchange="toggleStockField()">
+                                    <option value="true">🧪 Theo công thức</option>
+                                    <option value="false">📦 Nhập trực tiếp</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3" id="stockField" style="display:none;">
+                                <label class="form-label small fw-bold text-danger">Tồn kho ban đầu</label>
+                                <input type="number" name="stock" id="prod-stock" class="form-control rounded-pill border-danger" value="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Mô tả sản phẩm</label>
+                                <textarea name="description" id="prod-desc" class="form-control rounded-4" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold shadow-sm">LƯU THÔNG TIN SẢN PHẨM</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        function toggleStockField() {
+            var isRecipe = document.getElementById('prod-isRecipe').value;
+            document.getElementById('stockField').style.display = (isRecipe === 'false') ? 'block' : 'none';
+        }
+
+        function editProd(btn) {
+            var id = btn.getAttribute('data-id');
+            var name = btn.getAttribute('data-name');
+            var priceM = btn.getAttribute('data-pricem');
+            var priceL = btn.getAttribute('data-pricel');
+            var catId = btn.getAttribute('data-catid');
+            var imageUrl = btn.getAttribute('data-imageurl');
+            var desc = btn.getAttribute('data-desc');
+            var stock = btn.getAttribute('data-stock');
+            var isRecipe = btn.getAttribute('data-isrecipe');
+            var promoId = btn.getAttribute('data-promoid');
+
+            document.getElementById('modalTitle').innerText = 'Chỉnh sửa Sản phẩm';
+            document.getElementById('prod-id').value = id;
+            document.getElementById('prod-name').value = name;
+            document.getElementById('prod-priceM').value = priceM;
+            document.getElementById('prod-priceL').value = priceL === 'null' ? '' : priceL;
+            document.getElementById('prod-catId').value = catId;
+            document.getElementById('prod-imageUrl').value = imageUrl;
+            document.getElementById('prod-desc').value = desc;
+            document.getElementById('prod-stock').value = stock;
+            document.getElementById('prod-isRecipe').value = isRecipe === 'true' ? 'true' : 'false';
+            document.getElementById('prod-promoId').value = promoId === 'null' ? '' : promoId;
+            toggleStockField();
+        }
+
+        function resetForm() {
+            document.getElementById('modalTitle').innerText = 'Thêm sản phẩm mới';
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-priceM').value = '';
+            document.getElementById('prod-priceL').value = '';
+            document.getElementById('prod-desc').value = '';
+            document.getElementById('prod-stock').value = '0';
+            document.getElementById('prod-isRecipe').value = 'true';
+            document.getElementById('prod-promoId').value = '';
+            toggleStockField();
+        }
+    </script>
+</th:block>
+</body>
+</html>

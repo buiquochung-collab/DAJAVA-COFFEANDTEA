@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Thiết lập hệ thống | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Cấu hình hệ thống</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form th:action="@{/admin/settings/save}" method="post">
+        <div class="row g-4">
+            <!-- General Settings -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold text-success"><i class="fas fa-info-circle me-2"></i>Thông tin cửa hàng</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Số điện thoại Hotline</label>
+                            <input type="text" name="hotline" class="form-control rounded-pill" th:value="${settings['hotline']}" placeholder="Ví dụ: 1900 123 456">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Địa chỉ hiển thị trên Website</label>
+                            <textarea name="address" class="form-control rounded-4" rows="3" th:text="${settings['address']}" placeholder="Địa chỉ chi tiết..."></textarea>
+                        </div>
+                        <div class="form-check form-switch mt-4">
+                            <input class="form-check-input" type="checkbox" name="maintenance_mode" id="swMaintenance" th:checked="${settings['maintenance_mode'] == 'true'}">
+                            <label class="form-check-label fw-bold" for="swMaintenance">Chế độ bảo trì hệ thống</label>
+                            <div class="form-text small">Khi bật, khách hàng sẽ thấy thông báo bảo trì và không thể thực hiện đặt hàng.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loyalty Program -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold text-warning"><i class="fas fa-star me-2"></i>Chính sách hội viên</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tỷ lệ tích điểm</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light rounded-start-pill small">Cứ mỗi</span>
+                                <input type="number" name="point_rate" class="form-control" th:value="${settings['point_rate'] != null ? settings['point_rate'] : '10000'}">
+                                <span class="input-group-text rounded-end-pill small">VNĐ = 1 điểm</span>
+                            </div>
+                        </div>
+                        <hr class="my-4 opacity-10">
+                        <h6 class="fw-bold mb-3 small text-muted">ĐIỀU KIỆN THĂNG HẠNG (TÍNH BẰNG ĐIỂM)</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Hạng VÀNG (GOLD)</label>
+                                <input type="number" name="rank_gold" class="form-control rounded-pill" th:value="${settings['rank_gold'] != null ? settings['rank_gold'] : '100'}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Hạng KIM CƯƠNG (PLATINUM)</label>
+                                <input type="number" name="rank_platinum" class="form-control rounded-pill" th:value="${settings['rank_platinum'] != null ? settings['rank_platinum'] : '500'}">
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-light rounded-4 border-start border-4 border-warning small">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Gợi ý: Hạng <strong>KIM CƯƠNG</strong> nên được thiết lập gấp 5 lần hạng Vàng để tăng tính gắn kết.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Website Appearance -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-desktop me-2"></i>Giao diện & Hình ảnh Banner</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Banner chính (Trang chủ)</label>
+                                <input type="text" name="banner_main" class="form-control rounded-pill mb-3" th:value="${settings['banner_main']}" placeholder="Đường dẫn URL ảnh...">
+                                <div class="ratio ratio-21x9 overflow-hidden rounded-4 border shadow-sm">
+                                    <img th:src="${settings['banner_main']}" class="object-fit-cover w-100" alt="Banner chính">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Banner phụ (Khuyến mãi)</label>
+                                <input type="text" name="banner_promo" class="form-control rounded-pill mb-3" th:value="${settings['banner_promo']}" placeholder="Đường dẫn URL ảnh...">
+                                <div class="ratio ratio-21x9 overflow-hidden rounded-4 border shadow-sm">
+                                    <img th:src="${settings['banner_promo']}" class="object-fit-cover w-100" alt="Banner phụ">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Dòng chữ chạy thông báo (Marquee)</label>
+                                <input type="text" name="marquee_text" class="form-control rounded-pill" th:value="${settings['marquee_text']}" placeholder="Ví dụ: Chào mừng bạn đến với Tea & Coffee...">
+                                <div class="mt-3 p-3 bg-dark text-white rounded-3 small">
+                                    <span class="text-warning">Xem trước:</span>
+                                    <marquee class="mt-2" th:text="${settings['marquee_text']}"></marquee>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="col-12 text-center mt-4">
+                <button type="submit" class="btn btn-dark rounded-pill px-5 py-3 shadow-lg fw-bold">
+                    <i class="fas fa-save me-2"></i> LƯU TẤT CẢ CẤU HÌNH
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

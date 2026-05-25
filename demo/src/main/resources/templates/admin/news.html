@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý tin tức | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Quản lý tin tức & Sự kiện</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- News Form -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" id="news-form-title">Tạo tin tức mới</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/news/save}" method="post">
+                        <input type="hidden" name="id" id="news-id">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tiêu đề tin tức</label>
+                            <input type="text" name="title" id="news-title" class="form-control rounded-pill" placeholder="Tiêu đề hấp dẫn khách hàng..." required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Hình ảnh bìa (URL)</label>
+                            <input type="text" name="imageUrl" id="news-imageUrl" class="form-control rounded-pill" placeholder="Ví dụ: /uploads/news/promo1.png">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nội dung chi tiết</label>
+                            <textarea name="content" id="news-content" class="form-control rounded-4" rows="8" placeholder="Viết nội dung tin tức tại đây..."></textarea>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold shadow-sm">XUẤT BẢN TIN TỨC</button>
+                            <button type="reset" class="btn btn-light rounded-pill py-2" onclick="resetNewsForm()">LÀM MỚI FORM</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- News List -->
+        <div class="col-md-7">
+            <div class="row g-3">
+                <div class="col-12" th:each="news : ${newsList}">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                        <div class="row g-0 h-100">
+                            <div class="col-4">
+                                <img th:src="${news.imageUrl}" class="w-100 h-100" style="object-fit: cover; min-height: 150px;">
+                            </div>
+                            <div class="col-8">
+                                <div class="card-body p-3 d-flex flex-column h-100">
+                                    <h6 class="fw-bold mb-2 text-dark" th:text="${news.title}">News Title</h6>
+                                    <p class="small text-muted mb-auto" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" th:text="${news.content}">Summary content...</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                        <div class="small text-muted"><i class="far fa-calendar-alt me-1"></i> <span th:text="${#temporals.format(news.createdAt, 'dd/MM/yyyy')}"></span></div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary rounded-circle" 
+                                                    th:attr="data-id=${news.id}, data-title=${news.title}, data-imageurl=${news.imageUrl}, data-content=${news.content}"
+                                                    onclick="editNews(this)" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <a th:href="@{'/admin/news/delete/' + ${news.id}}" class="btn btn-sm btn-outline-danger rounded-circle ms-1" onclick="return confirm('Xóa tin tức này?')" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center py-5 text-muted" th:if="${newsList.isEmpty()}">
+                <i class="fas fa-newspaper fa-4x mb-3 opacity-10"></i>
+                <p>Chưa có bản tin nào được đăng.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        function editNews(btn) {
+            var id = btn.getAttribute('data-id');
+            var title = btn.getAttribute('data-title');
+            var imageUrl = btn.getAttribute('data-imageurl');
+            var content = btn.getAttribute('data-content');
+
+            document.getElementById('news-form-title').innerText = 'Cập nhật bản tin';
+            document.getElementById('news-id').value = id;
+            document.getElementById('news-title').value = title;
+            document.getElementById('news-imageUrl').value = imageUrl;
+            document.getElementById('news-content').value = content;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetNewsForm() {
+            document.getElementById('news-form-title').innerText = 'Tạo tin tức mới';
+            document.getElementById('news-id').value = '';
+        }
+    </script>
+</th:block>
+</body>
+</html>

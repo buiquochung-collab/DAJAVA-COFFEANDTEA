@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý khuyến mãi | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Chương trình khuyến mãi</h2>
+        <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#promoModal" onclick="resetPromoForm()">
+            <i class="fas fa-plus me-2"></i>TẠO KHUYẾN MÃI
+        </button>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4" th:each="promo : ${promotions}">
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-header border-0 py-3 d-flex justify-content-between align-items-center" 
+                     th:classappend="${promo.isActive ? 'bg-success text-white' : 'bg-secondary text-white'}">
+                    <h6 class="mb-0 fw-bold" th:text="${promo.name}">Promotion Name</h6>
+                    <span class="badge rounded-pill bg-white text-dark small" th:text="${promo.isActive ? 'ĐANG CHẠY' : 'TẠM DỪNG'}">Status</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="display-6 fw-bold text-center mb-3" 
+                         th:text="${promo.discountType.name() == 'PERCENT' ? promo.discountValue + '%' : #numbers.formatDecimal(promo.discountValue, 0, 'COMMA', 0, 'POINT') + 'đ'}">
+                        10%
+                    </div>
+                    <p class="text-muted small mb-4" th:text="${promo.description}">Description text here...</p>
+                    
+                    <div class="small mb-2"><i class="far fa-calendar-alt me-2"></i>Bắt đầu: <span th:text="${#temporals.format(promo.startDate, 'dd/MM/yyyy HH:mm')}"></span></div>
+                    <div class="small mb-4 text-danger"><i class="far fa-clock me-2"></i>Kết thúc: <span th:text="${#temporals.format(promo.endDate, 'dd/MM/yyyy HH:mm')}"></span></div>
+                    
+                    <div class="d-flex gap-2">
+                        <form th:action="@{'/admin/promotions/toggle/' + ${promo.id}}" method="post" class="flex-grow-1">
+                            <button type="submit" class="btn btn-sm w-100 rounded-pill" th:classappend="${promo.isActive ? 'btn-outline-secondary' : 'btn-outline-success'}">
+                                <i class="fas" th:classappend="${promo.isActive ? 'fa-pause' : 'fa-play'}"></i> 
+                                <span th:text="${promo.isActive ? 'Tạm dừng' : 'Kích hoạt'}"></span>
+                            </button>
+                        </form>
+                        <button class="btn btn-sm btn-outline-primary rounded-circle" 
+                                th:attr="data-id=${promo.id}, data-name=${promo.name}, data-desc=${promo.description}, data-val=${promo.discountValue}, data-type=${promo.discountType}, data-start=${promo.startDate}, data-end=${promo.endDate}"
+                                onclick="editPromo(this)" data-bs-toggle="modal" data-bs-target="#promoModal">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <a th:href="@{'/admin/promotions/delete/' + ${promo.id}}" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('Xóa chương trình này?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 text-center py-5 text-muted" th:if="${promotions.isEmpty()}">
+            <i class="fas fa-percentage fa-4x mb-3 opacity-10"></i>
+            <p>Chưa có chương trình khuyến mãi nào được tạo.</p>
+        </div>
+    </div>
+
+    <!-- Promo Modal -->
+    <div class="modal fade" id="promoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form th:action="@{/admin/promotions/save}" method="post">
+                    <div class="modal-header bg-dark text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold" id="promoModalTitle">Thiết lập khuyến mãi</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="id" id="promo-id">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tên chương trình</label>
+                            <input type="text" name="name" id="promo-name" class="form-control rounded-pill" required>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Loại giảm giá</label>
+                                <select name="discountType" id="promo-type" class="form-select rounded-pill">
+                                    <option value="PERCENT">Phần trăm (%)</option>
+                                    <option value="FIXED">Số tiền cố định (đ)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Giá trị giảm</label>
+                                <input type="number" name="discountValue" id="promo-val" class="form-control rounded-pill" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Ngày bắt đầu</label>
+                                <input type="datetime-local" name="startDate" id="promo-start" class="form-control rounded-pill" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Ngày kết thúc</label>
+                                <input type="datetime-local" name="endDate" id="promo-end" class="form-control rounded-pill" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Mô tả</label>
+                            <textarea name="description" id="promo-desc" class="form-control rounded-4" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold">LƯU KHUYẾN MÃI</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editPromo(btn) {
+            document.getElementById('promo-id').value = btn.getAttribute('data-id');
+            document.getElementById('promo-name').value = btn.getAttribute('data-name');
+            document.getElementById('promo-type').value = btn.getAttribute('data-type');
+            document.getElementById('promo-val').value = btn.getAttribute('data-val');
+            document.getElementById('promo-desc').value = btn.getAttribute('data-desc');
+            document.getElementById('promo-start').value = btn.getAttribute('data-start');
+            document.getElementById('promo-end').value = btn.getAttribute('data-end');
+        }
+
+        function resetPromoForm() {
+            document.getElementById('promo-id').value = '';
+            document.getElementById('promo-name').value = '';
+            document.getElementById('promo-val').value = '';
+            document.getElementById('promo-desc').value = '';
+        }
+    </script>
+</div>
+</body>
+</html>

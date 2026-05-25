@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý danh mục | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Quản lý danh mục</h2>
+        <div class="text-muted small">Tổng số: <span class="fw-bold text-dark" th:text="${#lists.size(categories)}">0</span> danh mục</div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Add/Edit Category Form -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold" id="form-title">Thêm danh mục mới</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/categories/save}" method="post">
+                        <input type="hidden" name="id" id="cat-id">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tên danh mục</label>
+                            <input type="text" name="name" id="cat-name" class="form-control rounded-pill" placeholder="Ví dụ: Trà trái cây" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Danh mục cha</label>
+                            <select name="parentId" id="cat-parent" class="form-select rounded-pill">
+                                <option value="">-- Không có --</option>
+                                <option th:each="cat : ${categories}" th:if="${cat.parentCategory == null}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Mô tả</label>
+                            <textarea name="description" id="cat-desc" class="form-control rounded-4" rows="3" placeholder="Mô tả ngắn gọn..."></textarea>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold shadow-sm">LƯU DANH MỤC</button>
+                            <button type="reset" class="btn btn-light rounded-pill py-2" onclick="resetCatForm()">LÀM MỚI</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category List -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Tên danh mục</th>
+                                <th>Danh mục cha</th>
+                                <th>Mô tả</th>
+                                <th class="text-end pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cat : ${categories}">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-success" th:text="${cat.name}">Category Name</div>
+                                    <small class="text-muted" th:text="'ID: #' + ${cat.id}"></small>
+                                </td>
+                                <td>
+                                    <span th:if="${cat.parentCategory != null}" class="badge bg-light text-dark rounded-pill border" th:text="${cat.parentCategory.name}">Parent</span>
+                                    <span th:unless="${cat.parentCategory != null}" class="text-muted small">-</span>
+                                </td>
+                                <td>
+                                    <div class="small text-muted text-truncate" style="max-width: 200px;" th:text="${cat.description}">Description</div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle" 
+                                            th:attr="data-id=${cat.id}, data-name=${cat.name}, data-parentid=${cat.parentCategory != null ? cat.parentCategory.id : ''}, data-desc=${cat.description}"
+                                            onclick="editCat(this)" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a th:href="@{'/admin/categories/delete/' + ${cat.id}}" class="btn btn-sm btn-outline-danger rounded-circle ms-1" 
+                                       onclick="return confirm('Xóa danh mục này sẽ ảnh hưởng đến các sản phẩm bên trong. Bạn chắc chắn?')" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        function editCat(btn) {
+            var id = btn.getAttribute('data-id');
+            var name = btn.getAttribute('data-name');
+            var parentId = btn.getAttribute('data-parentid');
+            var desc = btn.getAttribute('data-desc');
+
+            document.getElementById('form-title').innerText = 'Chỉnh sửa danh mục';
+            document.getElementById('cat-id').value = id;
+            document.getElementById('cat-name').value = name;
+            document.getElementById('cat-parent').value = parentId;
+            document.getElementById('cat-desc').value = desc;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetCatForm() {
+            document.getElementById('form-title').innerText = 'Thêm danh mục mới';
+            document.getElementById('cat-id').value = '';
+        }
+    </script>
+</th:block>
+</body>
+</html>

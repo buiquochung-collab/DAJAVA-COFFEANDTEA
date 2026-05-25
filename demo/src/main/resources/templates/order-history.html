@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Lịch sử đơn hàng | Tea & Coffee</title>
+    <style>
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 600;
+            padding: 15px 25px;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--pl-green);
+            background: transparent;
+            border-bottom: 3px solid var(--pl-green);
+        }
+        .order-item {
+            transition: transform 0.2s;
+            border: 1px solid #eee;
+            border-radius: 15px;
+        }
+        .order-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        /* Sidebar Styles */
+        .user-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f0f0f0;
+        }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .sidebar-menu-item i {
+            width: 25px;
+            margin-right: 10px;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+        .sidebar-menu-item:hover {
+            background: #f8f9fa;
+            color: var(--pl-green);
+        }
+        .sidebar-menu-item.active {
+            background: rgba(0,106,49,0.05);
+            color: var(--pl-green);
+            font-weight: 700;
+        }
+        .user-brief {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="user-sidebar">
+                    <div class="user-brief d-flex align-items-center" th:if="${currentUser != null}">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-3x text-success opacity-50"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="fw-bold mb-0 text-truncate" th:text="${currentUser.fullName ?: currentUser.username}"></h6>
+                            <small class="text-muted" th:text="${currentUser.membershipRank}"></small>
+                        </div>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a th:href="@{/user/profile}" class="sidebar-menu-item">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                        <a th:href="@{/user/membership}" class="sidebar-menu-item">
+                            <i class="fas fa-id-card"></i> Khách hàng thành viên
+                        </a>
+                        <a th:href="@{/user/orders}" class="sidebar-menu-item active">
+                            <i class="fas fa-history"></i> Lịch sử đơn hàng
+                        </a>
+                        <a th:href="@{/user/vouchers}" class="sidebar-menu-item">
+                            <i class="fas fa-gift"></i> Ưu đãi của bạn
+                        </a>
+                        <hr class="my-3">
+                        <a th:href="@{/logout}" class="sidebar-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <h2 class="fw-bold mb-0 text-success">LỊCH SỬ ĐƠN HÀNG</h2>
+                    
+                    <!-- Search Orders Form -->
+                    <form th:action="@{/user/orders}" method="get" class="d-flex gap-2 align-items-end">
+                        <div class="search-item">
+                            <label class="extra-small text-muted fw-bold mb-1">MÃ ĐƠN</label>
+                            <input type="number" name="orderId" class="form-control form-control-sm rounded-pill border-success-subtle" 
+                                   th:value="${searchOrderId}" style="width: 100px;">
+                        </div>
+                        <div class="search-item">
+                            <label class="extra-small text-muted fw-bold mb-1">NGÀY ĐẶT</label>
+                            <input type="date" name="date" class="form-control form-control-sm rounded-pill border-success-subtle" 
+                                   th:value="${searchDate}">
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a th:href="@{/user/orders}" class="btn btn-light btn-sm rounded-pill px-3" th:if="${searchOrderId != null or searchDate != null}">
+                            <i class="fas fa-redo"></i>
+                        </a>
+                    </form>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">Tất cả</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">Chờ thanh toán</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button">Đang xử lý</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button">Đang giao</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button">Hoàn thành</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button">Đã hủy</button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="orderTabsContent">
+                    <div class="tab-pane fade show active" id="all" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders})}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="pending" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders.?[status.name() == 'PENDING']})}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="processing" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders.?[status.name() == 'PROCESSING']})}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="shipping" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders.?[status.name() == 'SHIPPING' or status.name() == 'DELIVERED']})}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="completed" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders.?[status.name() == 'COMPLETED']})}"></div>
+                    </div>
+                    <div class="tab-pane fade" id="cancelled" role="tabpanel">
+                        <div th:replace="~{::orderList(${orders.?[status.name() == 'CANCELLED']})}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals Container -->
+    <div th:each="order : ${orders}">
+        <div class="modal fade" th:id="'orderModal-' + ${order.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header bg-success text-white rounded-top-4 border-0 p-4">
+                        <h5 class="modal-title fw-bold">Chi tiết đơn hàng #<span th:text="${order.id}"></span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small">Thời gian đặt</p>
+                                <p class="fw-bold" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small">Trạng thái</p>
+                                <p class="fw-bold text-success" th:text="${order.status}"></p>
+                            </div>
+                            <div class="col-md-12">
+                                <p class="mb-1 text-muted small">Địa chỉ giao hàng</p>
+                                <p class="fw-bold" th:text="${order.shippingAddress}"></p>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Số lượng</th>
+                                        <th class="text-end">Đơn giá</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${order.orderDetails}" class="border-bottom">
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img th:src="${item.product.imageUrl}" width="50" height="50" class="rounded object-fit-cover shadow-sm">
+                                                <div>
+                                                    <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
+                                                    <div class="small text-muted">
+                                                        Size: <span class="fw-bold" th:text="${item.size}"></span>
+                                                        <span th:if="${item.note != null and !item.note.isEmpty()}" th:text="' - Ghi chú: ' + ${item.note}"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center" th:text="${item.quantity}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                                        <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end pt-4">Tổng cộng:</td>
+                                        <td class="text-end pt-4 fw-bold h5 text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fragment for Order List (Defined outside content) -->
+<th:block th:fragment="orderList(orderList)">
+    <div th:if="${orderList == null or orderList.empty}" class="text-center py-5 bg-light rounded-4">
+        <i class="fas fa-receipt fa-3x text-muted mb-3 opacity-25"></i>
+        <p class="text-muted">Không có đơn hàng nào trong mục này.</p>
+    </div>
+    
+    <div th:each="order : ${orderList}" class="order-item p-4 mb-4 bg-white shadow-sm border border-light rounded-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold h5 mb-0" th:text="'#' + ${order.id}"></span>
+                <span class="text-muted small" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+            <div>
+                <span th:if="${order.status.name() == 'PENDING'}" class="status-badge bg-warning-subtle text-warning">Chờ thanh toán</span>
+                <span th:if="${order.status.name() == 'PROCESSING'}" class="status-badge bg-primary-subtle text-primary">Đang xử lý</span>
+                <span th:if="${order.status.name() == 'SHIPPING'}" class="status-badge bg-info-subtle text-info">Đang giao hàng</span>
+                <span th:if="${order.status.name() == 'DELIVERED'}" class="status-badge bg-info-subtle text-info">Đang giao hàng</span>
+                <span th:if="${order.status.name() == 'COMPLETED'}" class="status-badge bg-success-subtle text-success">Đã hoàn thành</span>
+                <span th:if="${order.status.name() == 'CANCELLED'}" class="status-badge bg-danger-subtle text-danger">Đã hủy</span>
+            </div>
+        </div>
+        
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex gap-2 mb-2">
+                    <i class="fas fa-map-marker-alt text-muted"></i>
+                    <span class="small text-muted" th:text="${order.shippingAddress}"></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <i class="fas fa-credit-card text-muted"></i>
+                    <span class="small text-muted" th:text="${order.paymentMethod}"></span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <p class="mb-1 small text-muted">Tổng cộng</p>
+                <h4 class="fw-bold text-success mb-3" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></h4>
+                
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" 
+                            data-bs-toggle="modal" th:data-bs-target="'#orderModal-' + ${order.id}">Chi tiết</button>
+                    
+                    <a th:if="${order.status.name() == 'PENDING' and (order.paymentMethod == 'MOMO' or order.paymentMethod == 'BANK_TRANSFER')}"
+                       th:href="@{'/cart/payment/' + ${order.paymentMethod == 'MOMO' ? 'momo' : 'bank'} + '/' + ${order.id}}"
+                       class="btn btn-success btn-sm rounded-pill px-3">
+                        Thanh toán ngay
+                    </a>
+
+                    <form th:if="${order.status.name() == 'PENDING'}" th:action="@{/user/orders/cancel}" method="post" 
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
+                        <input type="hidden" name="orderId" th:value="${order.id}">
+                        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3">Hủy đơn</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

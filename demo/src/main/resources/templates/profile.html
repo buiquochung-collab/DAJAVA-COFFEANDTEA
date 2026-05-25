@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Thông tin tài khoản | Tea & Coffee</title>
+    <style>
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--pl-green);
+            box-shadow: 0 0 0 0.2rem rgba(0,106,49,0.1);
+        }
+        
+        /* Sidebar Styles */
+        .user-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f0f0f0;
+        }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .sidebar-menu-item i {
+            width: 25px;
+            margin-right: 10px;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+        .sidebar-menu-item:hover {
+            background: #f8f9fa;
+            color: var(--pl-green);
+        }
+        .sidebar-menu-item.active {
+            background: rgba(0,106,49,0.05);
+            color: var(--pl-green);
+            font-weight: 700;
+        }
+        .user-brief {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="user-sidebar">
+                    <div class="user-brief d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-3x text-success opacity-50"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="fw-bold mb-0 text-truncate" th:text="${user.fullName ?: user.username}"></h6>
+                            <small class="text-muted" th:text="${user.membershipRank}"></small>
+                        </div>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a th:href="@{/user/profile}" class="sidebar-menu-item active">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                        <a th:href="@{/user/membership}" class="sidebar-menu-item">
+                            <i class="fas fa-id-card"></i> Khách hàng thành viên
+                        </a>
+                        <a th:href="@{/user/orders}" class="sidebar-menu-item">
+                            <i class="fas fa-history"></i> Lịch sử đơn hàng
+                        </a>
+                        <a th:href="@{/user/vouchers}" class="sidebar-menu-item">
+                            <i class="fas fa-gift"></i> Ưu đãi của bạn
+                        </a>
+                        <hr class="my-3">
+                        <a th:href="@{/logout}" class="sidebar-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="profile-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <h4 class="fw-bold mb-0 text-success">THÔNG TIN CÁ NHÂN</h4>
+                        <button form="profileForm" type="submit" class="btn btn-success rounded-pill px-4 fw-bold">LƯU THAY ĐỔI</button>
+                    </div>
+
+                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+                        Cập nhật thông tin thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <form th:action="@{/user/profile/update}" method="post" id="profileForm">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold">Email</label>
+                                <div class="input-group">
+                                    <input type="email" id="emailInput" name="email" class="form-control rounded-start-3" th:value="${user.email}" 
+                                           th:readonly="${user.email != null}">
+                                    <button th:if="${user.email == null}" class="btn btn-outline-success rounded-end-3 px-3 fw-bold" type="button" onclick="sendOtp()">XÁC THỰC OTP</button>
+                                </div>
+                                <small th:if="${user.email != null}" class="text-success extra-small mt-1 d-block"><i class="fas fa-check-circle me-1"></i>Đã xác thực và đồng bộ</small>
+                            </div>
+
+                            <!-- OTP Sync Section (Hidden by default) -->
+                            <div id="otpSection" class="col-12 mb-3" style="display: none;">
+                                <div class="p-3 bg-light rounded-3 border border-success-subtle shadow-sm text-center">
+                                    <label class="form-label small fw-bold text-success mb-2">NHẬP MÃ OTP ĐÃ GỬI ĐẾN EMAIL TRÊN</label>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <input type="text" id="otpInput" class="form-control rounded-pill border-success p-2 text-center fw-bold" style="max-width: 150px;" placeholder="000000" maxlength="6">
+                                        <button class="btn btn-success rounded-pill px-4" type="button" onclick="verifyOtp()">XÁC NHẬN</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script th:inline="javascript">
+                                function sendOtp() {
+                                    const email = document.getElementById('emailInput').value;
+                                    if(!email) { alert('Vui lòng nhập Email'); return; }
+                                    
+                                    fetch('/user/profile/request-email-otp?email=' + encodeURIComponent(email), {method: 'POST'})
+                                    .then(res => res.text())
+                                    .then(data => {
+                                        if(data === 'success') {
+                                            document.getElementById('otpSection').style.display = 'block';
+                                            alert('Mã OTP đã được gửi đến email ' + email + ' (kiểm tra console)');
+                                        } else {
+                                            alert(data);
+                                        }
+                                    });
+                                }
+
+                                function verifyOtp() {
+                                    const email = document.getElementById('emailInput').value;
+                                    const otp = document.getElementById('otpInput').value;
+                                    
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '/user/profile/verify-email-otp';
+                                    
+                                    const eInput = document.createElement('input');
+                                    eInput.type = 'hidden'; eInput.name = 'email'; eInput.value = email;
+                                    const oInput = document.createElement('input');
+                                    oInput.type = 'hidden'; oInput.name = 'otp'; oInput.value = otp;
+                                    
+                                    form.appendChild(eInput);
+                                    form.appendChild(oInput);
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+                            </script>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Họ và tên</label>
+                                <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" placeholder="Nhập họ tên đầy đủ">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" name="phone" class="form-control" th:value="${user.phone}" placeholder="0xxx xxx xxx">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số CCCD</label>
+                                <input type="text" name="cccd" class="form-control" th:value="${user.cccd}" placeholder="Nhập số CCCD">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày sinh</label>
+                                <input type="date" name="birthDate" class="form-control" th:value="${user.birthDate}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Giới tính</label>
+                                <select name="gender" class="form-select">
+                                    <option value="Nam" th:selected="${user.gender == 'Nam'}">Nam</option>
+                                    <option value="Nữ" th:selected="${user.gender == 'Nữ'}">Nữ</option>
+                                    <option value="Khác" th:selected="${user.gender == 'Khác'}">Khác</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-12 mt-4">
+                                <h6 class="fw-bold text-muted small text-uppercase border-start border-success border-3 ps-2">Địa chỉ liên hệ</h6>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Tỉnh/Thành</label>
+                                <select id="province" name="province" class="form-select">
+                                    <option value="">Chọn Tỉnh/Thành</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Quận/Huyện</label>
+                                <select id="district" name="district" class="form-select">
+                                    <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Phường/Xã</label>
+                                <select id="ward" name="ward" class="form-select">
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Địa chỉ chi tiết</label>
+                                <textarea name="addressDetail" class="form-control" rows="2" placeholder="Số nhà, tên đường..." th:text="${user.addressDetail}"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vietnam Administrative Units Script -->
+    <script th:inline="javascript">
+        const host = "https://provinces.open-api.vn/api/";
+        const currentProvince = [[${user.province}]];
+        const currentDistrict = [[${user.district}]];
+        const currentWard = [[${user.ward}]];
+
+        var renderData = (array, select) => {
+            let row = ' <option disable value="">Chọn</option>';
+            array.forEach(element => {
+                row += `<option data-id="${element.code}" value="${element.name}">${element.name}</option>`
+            });
+            document.querySelector("#" + select).innerHTML = row;
+        }
+
+        var callAPI = (api) => {
+            return fetch(api).then((response) => response.json());
+        }
+
+        const callApiDistrict = (api) => {
+            return fetch(api).then((response) => response.json())
+                .then((data) => {
+                    renderData(data.districts, "district");
+                    if (currentDistrict) {
+                        document.querySelector("#district").value = currentDistrict;
+                        // Trigger ward load if district was set
+                        const districtId = document.querySelector("#district").options[document.querySelector("#district").selectedIndex]?.dataset.id;
+                        if (districtId) {
+                            callApiWard(host + "d/" + districtId + "?depth=2");
+                        }
+                    }
+                });
+        }
+
+        const callApiWard = (api) => {
+            return fetch(api).then((response) => response.json())
+                .then((data) => {
+                    renderData(data.wards, "ward");
+                    if (currentWard) {
+                        document.querySelector("#ward").value = currentWard;
+                    }
+                });
+        }
+
+        // Initialize Provinces
+        callAPI(host + "?depth=1").then((data) => {
+            renderData(data, "province");
+            if (currentProvince) {
+                document.querySelector("#province").value = currentProvince;
+                const provinceId = document.querySelector("#province").options[document.querySelector("#province").selectedIndex]?.dataset.id;
+                if (provinceId) {
+                    callApiDistrict(host + "p/" + provinceId + "?depth=2");
+                }
+            }
+        });
+
+        document.querySelector("#province").addEventListener("change", () => {
+            const provinceId = document.querySelector("#province").options[document.querySelector("#province").selectedIndex].dataset.id;
+            if (provinceId) {
+                callApiDistrict(host + "p/" + provinceId + "?depth=2");
+            } else {
+                document.querySelector("#district").innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                document.querySelector("#ward").innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
+        });
+
+        document.querySelector("#district").addEventListener("change", () => {
+            const districtId = document.querySelector("#district").options[document.querySelector("#district").selectedIndex].dataset.id;
+            if (districtId) {
+                callApiWard(host + "d/" + districtId + "?depth=2");
+            } else {
+                document.querySelector("#ward").innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
+
+</body>
+</html>

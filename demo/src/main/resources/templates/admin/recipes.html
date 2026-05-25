@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Công thức & Giá vốn | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex align-items-center mb-4">
+        <a href="/admin/products" class="btn btn-outline-secondary rounded-circle me-3 shadow-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="fw-bold mb-0">Thiết lập công thức: <span class="text-success" th:text="${product.name}">Sản phẩm</span></h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Add Ingredient Form -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">Thêm nguyên liệu thành phần</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/recipes/save}" method="post">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Chọn nguyên liệu</label>
+                            <select name="ingredientId" class="form-select rounded-pill" required>
+                                <option value="">-- Chọn từ kho hàng --</option>
+                                <option th:each="ing : ${ingredients}" th:value="${ing.id}" th:text="${ing.name} + ' (' + ${ing.unit} + ')'"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Định lượng (cho 1 khẩu phần)</label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" name="quantity" class="form-control rounded-start-pill" placeholder="Ví dụ: 0.05" required>
+                                <span class="input-group-text rounded-end-pill bg-light small">Số lượng</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold mt-2 shadow-sm">THÊM VÀO CÔNG THỨC</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cost Summary -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-dark text-white">
+                <div class="card-body p-4 text-center">
+                    <div class="small opacity-50 text-uppercase">Tổng giá vốn (Cost)</div>
+                    <h2 class="fw-bold my-2" th:text="${#numbers.formatDecimal(totalCost, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</h2>
+                    <hr class="opacity-10 my-3">
+                    <div class="small opacity-50 text-uppercase">Giá bán niêm yết (M)</div>
+                    <h4 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(product.priceM, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</h4>
+                    
+                    <div class="p-2 rounded-3 bg-success bg-opacity-25 border border-success border-opacity-50" th:if="${product.priceM > 0}">
+                        <span class="small opacity-75">Tỷ suất lợi nhuận gộp:</span>
+                        <span class="fw-bold ms-1" th:text="${#numbers.formatDecimal((product.priceM - totalCost) / product.priceM * 100, 1, 1)} + '%'">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recipe Table -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Thành phần nguyên liệu</th>
+                                <th>Định lượng</th>
+                                <th>Đơn giá gốc</th>
+                                <th>Thành tiền (Cost)</th>
+                                <th class="text-end pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="r : ${recipes}">
+                                <td class="ps-4 fw-bold text-dark" th:text="${r.ingredient.name}">Ingredient</td>
+                                <td th:text="${#numbers.formatDecimal(r.quantityRequired, 0, 'COMMA', 3, 'POINT')} + ' ' + ${r.ingredient.unit}">0.05</td>
+                                <td class="small text-muted" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                                <td class="text-success fw-bold" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit * r.quantityRequired, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                                <td class="text-end pe-4">
+                                    <a th:href="@{'/admin/recipes/delete/' + ${r.id}}" class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" onclick="return confirm('Loại bỏ nguyên liệu này khỏi công thức?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recipes)}">
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-flask fa-4x mb-3 opacity-10"></i>
+                                    <p>Chưa có dữ liệu thành phần cho món này. Hãy thêm nguyên liệu để tính giá vốn.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

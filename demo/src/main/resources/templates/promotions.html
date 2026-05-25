@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Khuyến mãi & Tin tức</title>
+    <style>
+        .news-card { transition: 0.3s; border: none; border-radius: 20px !important; overflow: hidden; }
+        .news-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
+        .news-img { height: 280px; object-fit: cover; }
+        
+        .voucher-card { transition: 0.3s; position: relative; }
+        .voucher-card:hover { transform: scale(1.02); }
+        .voucher-left { position: relative; }
+        .voucher-left::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            background-image: radial-gradient(circle, #f8f9fa 5px, transparent 5px);
+            background-size: 10px 15px;
+            z-index: 10;
+        }
+        .extra-small { font-size: 0.75rem; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyBtns = document.querySelectorAll('.copy-btn');
+            copyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = this.innerText;
+                        this.innerText = 'Đã chép!';
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-success', 'text-white');
+                        setTimeout(() => {
+                            this.innerText = originalText;
+                            this.classList.remove('btn-success', 'text-white');
+                            this.classList.add('btn-outline-success');
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold section-title text-uppercase">Khuyến mãi & Tin tức</h2>
+            <div class="mx-auto mt-2" style="width: 80px; height: 4px; background-color: var(--pl-green); border-radius: 2px;"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" th:each="news : ${newsList}">
+                <div class="card news-card shadow-sm h-100">
+                    <a th:href="@{'/news/' + ${news.id}}">
+                        <img th:src="${news.imageUrl}" class="card-img-top news-img" alt="News Image">
+                    </a>
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="small text-muted mb-2">
+                            <i class="far fa-calendar-alt me-2"></i>
+                            <span th:text="${#temporals.format(news.createdAt, 'dd/MM/yyyy')}">Date</span>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">
+                            <a th:href="@{'/news/' + ${news.id}}" class="text-dark text-decoration-none" th:text="${news.title}">Tiêu đề</a>
+                        </h5>
+                        <p class="card-text text-muted small flex-grow-1" th:text="${#strings.abbreviate(news.content, 150)}">Nội dung tóm tắt...</p>
+                        <a th:href="@{'/news/' + ${news.id}}" class="text-success fw-bold text-decoration-none mt-3 small">
+                            XEM CHI TIẾT <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${newsList.empty}" class="col-12 text-center py-5">
+                <p class="text-muted">Hiện chưa có bản tin nào.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

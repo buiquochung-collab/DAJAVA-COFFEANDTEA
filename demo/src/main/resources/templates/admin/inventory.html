@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý kho hàng | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Quản lý kho nguyên liệu</h2>
+        <div class="d-flex gap-3">
+            <div class="card card-custom px-3 py-2 bg-white shadow-sm border-0 rounded-4">
+                <div class="small text-muted">Tổng giá trị tồn kho</div>
+                <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(totalValue, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</div>
+            </div>
+            <div class="card card-custom px-3 py-2 bg-white shadow-sm border-0 rounded-4">
+                <div class="small text-muted">Mặt hàng sắp hết</div>
+                <div class="fw-bold text-danger" th:text="${lowStockCount} + ' món'">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Inventory Tabs -->
+    <ul class="nav nav-pills mb-4 p-1 bg-white rounded-pill shadow-sm d-inline-flex" id="inventoryTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill px-4" id="stock-tab" data-bs-toggle="pill" data-bs-target="#stockContent">Tồn kho hiện tại</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-4" id="logs-tab" data-bs-toggle="pill" data-bs-target="#logsContent">Nhật ký nhập hàng</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content">
+        <!-- Stock Content -->
+        <div class="tab-pane fade show active" id="stockContent">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Nguyên liệu</th>
+                                <th>Tồn kho khả dụng</th>
+                                <th>Đơn vị tính</th>
+                                <th>Giá vốn TB</th>
+                                <th>Tình trạng</th>
+                                <th class="text-end pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ing : ${ingredients}">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark" th:text="${ing.name}">Ingredient Name</div>
+                                    <small class="text-muted" th:text="'Mã: #' + ${ing.id}"></small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold" th:classappend="${ing.stockQuantity <= 5 ? 'text-danger' : 'text-dark'}" 
+                                          th:text="${#numbers.formatDecimal(ing.stockQuantity, 0, 'COMMA', 2, 'POINT')}">10.00</span>
+                                </td>
+                                <td class="small" th:text="${ing.unit}">ml</td>
+                                <td th:text="${#numbers.formatDecimal(ing.costPerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'">100đ</td>
+                                <td>
+                                    <span class="badge rounded-pill" 
+                                          th:classappend="${ing.stockQuantity > 20 ? 'bg-success-subtle text-success' : (ing.stockQuantity > 5 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger')}"
+                                          th:text="${ing.stockQuantity > 20 ? 'An toàn' : (ing.stockQuantity > 5 ? 'Cảnh báo' : 'Cần nhập hàng')}">Status</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" 
+                                            th:attr="data-id=${ing.id}, data-name=${ing.name}, data-cost=${ing.costPerUnit}"
+                                            onclick="openRestockModal(this)">
+                                        <i class="fas fa-plus me-1"></i>Nhập hàng
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs Content -->
+        <div class="tab-pane fade" id="logsContent">
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm" onclick="exportInventory()">
+                    <i class="fas fa-file-export me-1"></i> Xuất dữ liệu (Excel)
+                </button>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Thời gian thực hiện</th>
+                                <th>Nguyên liệu</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá nhập</th>
+                                <th>Nhà cung cấp</th>
+                                <th>Người nhập</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${inventoryLogs}">
+                                <td class="ps-4 small" th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td class="fw-bold" th:text="${log.ingredient.name}"></td>
+                                <td class="text-success fw-bold" th:text="'+ ' + ${log.quantity} + ' ' + ${log.ingredient.unit}"></td>
+                                <td th:text="${#numbers.formatDecimal(log.pricePerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                <td class="small" th:text="${log.supplier}"></td>
+                                <td class="small fw-bold" th:text="${log.performer.username}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restock Modal -->
+    <div class="modal fade" id="restockModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form th:action="@{/admin/inventory/restock}" method="post">
+                    <div class="modal-header bg-success text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold">Phiếu nhập kho chi tiết</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="id" id="restock-id">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên nguyên liệu</label>
+                            <input type="text" id="restock-name" class="form-control rounded-pill bg-light" readonly>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Số lượng nhập</label>
+                                <input type="number" step="0.01" name="quantity" class="form-control rounded-pill" required min="0.01">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Đơn giá nhập (VNĐ)</label>
+                                <input type="number" name="price" id="restock-price" class="form-control rounded-pill" required>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label fw-bold small">Nhà cung cấp / Nguồn hàng</label>
+                            <input type="text" name="supplier" class="form-control rounded-pill" placeholder="Tên công ty hoặc chợ đầu mối..." required>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label fw-bold small">Ghi chú bổ sung</label>
+                            <textarea name="note" class="form-control rounded-4" rows="2" placeholder="Thông tin về chất lượng đợt hàng..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 shadow-sm fw-bold">XÁC NHẬN NHẬP KHO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        function openRestockModal(btn) {
+            var id = btn.getAttribute('data-id');
+            var name = btn.getAttribute('data-name');
+            var cost = btn.getAttribute('data-cost');
+            document.getElementById('restock-id').value = id;
+            document.getElementById('restock-name').value = name;
+            document.getElementById('restock-price').value = cost;
+            new bootstrap.Modal(document.getElementById('restockModal')).show();
+        }
+
+        function exportInventory() {
+            window.location.href = '/api/reports/export/inventory';
+        }
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${product.name}">Chi tiết sản phẩm</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}" class="text-primary text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{'/category/' + ${product.category.id}}" th:text="${product.category.name}" class="text-primary text-decoration-none">Category</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Product Name</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Product Image -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm p-4">
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/uploads/products/default.png'}" 
+                         class="img-fluid rounded mx-auto d-block" style="max-height: 400px; object-fit: contain;" alt="Product Image">
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-md-6">
+                <h1 class="display-6 fw-bold mb-2" th:text="${product.name}">Product Name</h1>
+                
+                <div class="mb-3">
+                    <span class="text-muted text-decoration-line-through h4 me-2" 
+                          th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}"
+                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span>
+                    <span class="h2 fw-bold text-success mb-0" id="displayPrice" 
+                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span>
+                    <span th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}" 
+                          class="badge bg-danger ms-2 rounded-pill" 
+                          th:text="'-' + (product.promotion.discountType.name() == 'PERCENT' ? product.promotion.discountValue + '%' : #numbers.formatDecimal(product.promotion.discountValue, 0, 'COMMA', 0, 'POINT') + 'đ')"></span>
+                </div>
+
+                <div class="mb-4">
+                    <span th:if="${product.calculatedStock > 0}" class="badge bg-light text-dark border rounded-pill px-3" 
+                          th:text="'Còn lại: ' + ${product.calculatedStock} + ' sản phẩm'"></span>
+                    <span th:if="${product.calculatedStock <= 0}" class="badge bg-danger rounded-pill px-3">Hết hàng</span>
+                </div>
+
+                <p class="text-muted mb-4" th:text="${product.description}">Mô tả chi tiết về sản phẩm.</p>
+                
+                <form th:action="@{/cart/add}" method="post" id="orderForm">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    
+                    <!-- Size Selection -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3 text-uppercase">Chọn Size</h6>
+                        <div class="d-flex gap-4 align-items-center">
+                            <!-- Hiển thị size M cho tất cả -->
+                            <div class="form-check p-0">
+                                <input class="form-check-input d-none" type="radio" name="size" id="sizeM" value="M" checked 
+                                       th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}" onchange="updatePriceDisplay(this)">
+                                <label class="size-circle" for="sizeM">M</label>
+                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
+                            </div>
+                            
+                            <!-- Chỉ hiện size L nếu không phải Đá xay và có giá L -->
+                            <div class="form-check p-0" th:if="${!#strings.contains(product.category.name, 'Đá xay') and product.priceL != null}">
+                                <input class="form-check-input d-none" type="radio" name="size" id="sizeL" value="L" 
+                                       th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}" onchange="updatePriceDisplay(this)">
+                                <label class="size-circle" for="sizeL">L</label>
+                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customization (Ghi chú) -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3 text-uppercase">Ghi chú (Tùy chọn)</h6>
+                        <textarea name="note" class="form-control" rows="3" placeholder="Ví dụ: Ít đường, nhiều đá, hoặc yêu cầu khác..."></textarea>
+                    </div>
+
+                    <div class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <div class="input-group" style="width: 130px;">
+                                <button class="btn btn-outline-success" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
+                                <input type="number" class="form-control text-center" name="quantity" value="1" min="1" th:max="${product.calculatedStock}">
+                                <button class="btn btn-outline-success" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-success btn-lg px-5 text-uppercase fw-bold" style="border-radius: 0;" 
+                                    th:disabled="${product.calculatedStock <= 0}">
+                                <span th:text="${product.calculatedStock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng'}">Thêm vào giỏ hàng</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <script>
+                    function updatePriceDisplay(element) {
+                        const price = element.getAttribute('data-price');
+                        document.getElementById('displayPrice').innerText = price;
+                    }
+                </script>
+
+                <div class="mt-5 border-top pt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold text-success mb-0">ĐÁNH GIÁ SẢN PHẨM</h4>
+                        <span class="badge bg-success rounded-pill px-3" th:text="${reviews != null ? reviews.size() : 0} + ' nhận xét'"></span>
+                    </div>
+                    
+                    <!-- Review List Box -->
+                    <div class="review-container mb-5">
+                        <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-5 bg-light rounded-4">
+                            <i class="far fa-comment-dots fa-3x text-muted mb-3 opacity-25"></i>
+                            <p class="text-muted italic">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên!</p>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-12" th:each="review : ${reviews}">
+                                <div class="review-card p-4 rounded-4 shadow-sm border-0 bg-white">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="flex-shrink-0 bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark" th:text="${review.user.fullName ?: review.user.username}">User</h6>
+                                                <div class="text-warning small">
+                                                    <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                                                       th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
+                                    </div>
+                                    <div class="mt-3 p-3 bg-light rounded-3">
+                                        <p class="mb-0 text-secondary" th:text="${review.comment}">Comment</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Review Form Box -->
+                    <div th:if="${currentUser != null}" class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-success text-white p-3 border-0">
+                            <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib me-2"></i>Gửi đánh giá của bạn</h6>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <form th:action="@{/review/add}" method="post">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <div class="row mb-3 align-items-center">
+                                    <div class="col-auto">
+                                        <label class="form-label mb-0 fw-bold small text-muted">CHỌN XẾP HẠNG:</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <select name="rating" class="form-select form-select-sm border-success rounded-pill px-3 shadow-none">
+                                            <option value="5">⭐⭐⭐⭐ (Rất tốt)</option>
+                                            <option value="4">⭐⭐⭐⭐ (Tốt)</option>
+                                            <option value="3">⭐⭐⭐ (Bình thường)</option>
+                                            <option value="2">⭐⭐ (Tạm được)</option>
+                                            <option value="1">⭐ (Tệ)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea name="comment" class="form-control rounded-4 border-light-subtle p-3 shadow-none" rows="3" placeholder="Nhập cảm nhận của bạn về sản phẩm..." required></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">GỬI ĐÁNH GIÁ</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div th:if="${currentUser == null}" class="alert alert-warning rounded-4 border-0 py-3 d-flex align-items-center gap-3">
+                        <i class="fas fa-info-circle fa-lg"></i>
+                        <span>Vui lòng <a th:href="@{/login}" class="fw-bold text-dark text-decoration-none">Đăng nhập</a> để gửi đánh giá cho sản phẩm này.</span>
+                    </div>
+                </div>
+
+                <style>
+                    .review-card { transition: 0.3s; border: 1px solid #f8f9fa !important; }
+                    .review-card:hover { border-color: var(--pl-green) !important; transform: scale(1.01); }
+                    .extra-small { font-size: 0.75rem; }
+                </style>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

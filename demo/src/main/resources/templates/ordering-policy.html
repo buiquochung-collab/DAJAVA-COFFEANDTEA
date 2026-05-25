@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Chính sách đặt hàng | Tea & Coffee</title>
+    <style>
+        .policy-content h4 {
+            color: #006a31;
+            font-weight: bold;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .policy-content p, .policy-content li {
+            line-height: 1.6;
+            color: #444;
+        }
+        .policy-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .policy-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-success">CHÍNH SÁCH ĐẶT HÀNG</h1>
+            <p class="text-muted">Chào mừng bạn đến với Tea & Coffee - Tận hưởng hương vị ngọt ngào!</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row g-4">
+                    <!-- Delivery Policy -->
+                    <div class="col-md-6">
+                        <div class="card h-100 policy-card bg-light p-4">
+                            <h4><i class="fas fa-truck me-2"></i> Giao hàng</h4>
+                            <ul>
+                                <li><strong>Đơn hàng tối thiểu:</strong> Từ 50,000đ.</li>
+                                <li><strong>Phạm vi:</strong> Hỗ trợ giao trong bán kính 5km từ cửa hàng gần nhất.</li>
+                                <li><strong>Thời gian:</strong> Giao hàng nhanh từ 20 - 45 phút tùy khu vực.</li>
+                                <li><strong>Phí ship:</strong> Miễn phí cho đơn hàng trên 200,000đ.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Return Policy -->
+                    <div class="col-md-6">
+                        <div class="card h-100 policy-card bg-light p-4">
+                            <h4><i class="fas fa-sync-alt me-2"></i> Đổi trả & Hoàn tiền</h4>
+                            <ul>
+                                <li><strong>Lỗi sản phẩm:</strong> Đổi mới 1-1 nếu sản phẩm không đúng mẫu hoặc có lỗi chất lượng.</li>
+                                <li><strong>Thời hạn:</strong> Phản hồi ngay trong vòng 1 giờ sau khi nhận hàng.</li>
+                                <li><strong>Yêu cầu:</strong> Vui lòng giữ lại hóa đơn và hình ảnh sản phẩm lỗi.</li>
+                                <li><strong>Hủy đơn:</strong> Không hỗ trợ hủy đơn khi bánh đã vào lò chế biến.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Payment Policy -->
+                    <div class="col-md-12">
+                        <div class="card policy-card border p-4">
+                            <h4><i class="fas fa-credit-card me-2"></i> Thanh toán</h4>
+                            <p>Tea & Coffee hỗ trợ đa dạng phương thức thanh toán để bạn thuận tiện nhất:</p>
+                            <div class="d-flex gap-4 flex-wrap mt-2">
+                                <span class="badge bg-white text-dark border p-2 px-3 fw-normal rounded-pill"><i class="fas fa-money-bill-wave text-success me-2"></i>Tiền mặt (COD)</span>
+                                <span class="badge bg-white text-dark border p-2 px-3 fw-normal rounded-pill"><i class="fas fa-university text-primary me-2"></i>Chuyển khoản Ngân hàng</span>
+                                <span class="badge bg-white text-dark border p-2 px-3 fw-normal rounded-pill"><i class="fas fa-wallet text-danger me-2"></i>Ví điện tử (Momo, ZaloPay)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <p class="small text-muted mb-4">Mọi thắc mắc vui lòng liên hệ Hotline: <strong>1900 123 456</strong></p>
+                    <a th:href="@{/menu}" class="btn btn-success px-5 py-3 rounded-pill fw-bold shadow">TIẾP TỤC MUA SẮM</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

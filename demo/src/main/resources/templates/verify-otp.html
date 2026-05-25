@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Xác thực OTP | Tea & Coffee</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="fw-bold text-success mb-3">XÁC THỰC OTP</h3>
+                        <p class="text-muted small mb-4">Chúng tôi đã gửi mã xác thực gồm 6 chữ số đến tài khoản của bạn. Vui lòng kiểm tra và nhập vào bên dưới.</p>
+
+                        <div th:if="${error}" class="alert alert-danger rounded-pill py-2 small" th:text="${error}"></div>
+
+                        <form th:action="@{/auth/verify-otp}" method="post">
+                            <div class="mb-4">
+                                <input type="text" name="otp" class="form-control text-center fs-2 fw-bold tracking-widest border-success-subtle rounded-4 p-3 shadow-none" maxlength="6" required placeholder="000000">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success rounded-pill py-3 fw-bold shadow-sm">XÁC THỰC</button>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-4">
+                            <p class="small text-muted">Không nhận được mã? <a href="#" class="text-success fw-bold text-decoration-none">Gửi lại sau 60s</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .tracking-widest { letter-spacing: 0.5rem; }
+    </style>
+</div>
+</body>
+</html>

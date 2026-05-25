@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Điều khoản sử dụng | Tea & Coffee</title>
+    <style>
+        .policy-content h4 {
+            color: #006a31;
+            font-weight: bold;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .policy-content p, .policy-content li {
+            line-height: 1.6;
+            color: #444;
+        }
+        .policy-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-success">ĐIỀU KHOẢN SỬ DỤNG</h1>
+            <p class="text-muted">Vui lòng đọc kỹ các điều khoản trước khi sử dụng dịch vụ của Tea & Coffee.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10 policy-content">
+                <div class="card policy-card bg-light p-4 mb-4">
+                    <h4>1. Chấp nhận điều khoản</h4>
+                    <p>Bằng cách truy cập và sử dụng trang web này, bạn đồng ý tuân thủ và bị ràng buộc bởi các điều khoản và điều kiện này.</p>
+                    
+                    <h4>2. Tài khoản cá nhân</h4>
+                    <p>Bạn có trách nhiệm bảo mật mật khẩu và thông tin tài khoản của mình. Mọi hoạt động diễn ra dưới tài khoản của bạn sẽ thuộc trách nhiệm của bạn.</p>
+
+                    <h4>3. Đặt hàng và Giá cả</h4>
+                    <p>Chúng tôi nỗ lực cung cấp thông tin giá cả chính xác nhất. Tuy nhiên, sai sót vẫn có thể xảy ra. Trong trường hợp đó, chúng tôi sẽ liên hệ với bạn để xác nhận hoặc hủy đơn hàng.</p>
+
+                    <h4>4. Quyền sở hữu trí tuệ</h4>
+                    <p>Mọi nội dung trên trang web bao gồm văn bản, hình ảnh, logo đều thuộc sở hữu của Tea & Coffee và được bảo vệ bởi luật bản quyền.</p>
+
+                    <h4>5. Thay đổi điều khoản</h4>
+                    <p>Chúng tôi có quyền thay đổi các điều khoản này bất kỳ lúc nào mà không cần thông báo trước. Việc bạn tiếp tục sử dụng dịch vụ đồng nghĩa với việc bạn chấp nhận các thay đổi đó.</p>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <p class="small text-muted mb-4">Mọi thắc mắc về điều khoản vui lòng liên hệ: <strong>1900 123 456</strong></p>
+                    <a th:href="@{/}" class="btn btn-success px-5 py-3 rounded-pill fw-bold shadow">QUAY LẠI TRANG CHỦ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

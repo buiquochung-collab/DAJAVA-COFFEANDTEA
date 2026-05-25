@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý Voucher | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Hệ thống mã giảm giá (Voucher)</h2>
+        <div>
+            <button class="btn btn-outline-primary rounded-pill px-4 me-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#assignVoucherModal">
+                <i class="fas fa-gift me-2"></i>TẶNG VOUCHER
+            </button>
+            <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addVoucherModal">
+                <i class="fas fa-plus me-2"></i>TẠO MÃ MỚI
+            </button>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Voucher List -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Mã Voucher</th>
+                        <th>Giá trị giảm</th>
+                        <th>Điều kiện áp dụng</th>
+                        <th>Thời hạn sử dụng</th>
+                        <th class="pe-4 text-end">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${vouchers}">
+                        <td class="ps-4">
+                            <div class="fw-bold text-primary" th:text="${v.code}">CODE</div>
+                            <small class="text-muted" th:text="${v.description}"></small>
+                        </td>
+                        <td class="fw-bold text-danger" th:text="${v.discountType == 'PERCENT' ? v.discountAmount + '%' : #numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
+                        <td>
+                            <div class="small">Đơn từ: <span class="fw-bold" th:text="${#numbers.formatDecimal(v.minOrderAmount, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span></div>
+                            <div class="small" th:if="${v.maxDiscount != null}">Tối đa: <span class="fw-bold" th:text="${#numbers.formatDecimal(v.maxDiscount, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span></div>
+                        </td>
+                        <td>
+                            <div class="small">Bắt đầu: <span th:text="${#temporals.format(v.startDate, 'dd/MM/yyyy')}"></span></div>
+                            <div class="small text-danger">Kết thúc: <span th:text="${#temporals.format(v.expiryDate, 'dd/MM/yyyy')}"></span></div>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <span th:if="${v.expiryDate.isAfter(#temporals.createNow())}" class="badge bg-success-subtle text-success rounded-pill">Khả dụng</span>
+                            <span th:unless="${v.expiryDate.isAfter(#temporals.createNow())}" class="badge bg-secondary-subtle text-secondary rounded-pill">Hết hạn</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${vouchers.isEmpty()}">
+                        <td colspan="5" class="text-center py-5 text-muted">Chưa có mã giảm giá nào được tạo.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Voucher -->
+    <div class="modal fade" id="addVoucherModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form th:action="@{/admin/vouchers/save}" method="post">
+                    <div class="modal-header bg-dark text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold">Tạo mã Voucher mới</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mã CODE (Tối đa 15 ký tự)</label>
+                            <input type="text" name="code" class="form-control rounded-pill text-uppercase" placeholder="Ví dụ: Tea & Coffee2024" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mô tả chương trình</label>
+                            <input type="text" name="description" class="form-control rounded-pill" placeholder="Ví dụ: Giảm 20k cho đơn hàng từ 100k" required>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Loại chiết khấu</label>
+                                <select name="discountType" class="form-select rounded-pill">
+                                    <option value="FIXED">Số tiền cố định (đ)</option>
+                                    <option value="PERCENT">Theo phần trăm (%)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Giá trị giảm</label>
+                                <input type="number" name="discountAmount" class="form-control rounded-pill" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Đơn tối thiểu (đ)</label>
+                                <input type="number" name="minOrderAmount" class="form-control rounded-pill" value="0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Giảm tối đa (đ)</label>
+                                <input type="number" name="maxDiscount" class="form-control rounded-pill" placeholder="Không giới hạn">
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày bắt đầu</label>
+                                <input type="datetime-local" name="startDate" class="form-control rounded-pill" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Ngày hết hạn</label>
+                                <input type="datetime-local" name="expiryDate" class="form-control rounded-pill" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold shadow-sm">LƯU MÃ GIẢM GIÁ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tặng Voucher -->
+    <div class="modal fade" id="assignVoucherModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <form th:action="@{/admin/vouchers/assign}" method="post">
+                    <div class="modal-header bg-primary text-white border-0 py-3">
+                        <h5 class="modal-title fw-bold">Phát hành Voucher cá nhân</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Chọn mã Voucher</label>
+                            <select name="voucherId" class="form-select rounded-pill" required>
+                                <option value="">-- Danh sách mã khả dụng --</option>
+                                <option th:each="v : ${vouchers}" th:value="${v.id}" th:text="${v.code} + ' (' + ${v.description} + ')'"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Khách hàng nhận</label>
+                            <select name="userId" class="form-select rounded-pill">
+                                <option value="">-- Gửi cho TẤT CẢ KHÁCH HÀNG --</option>
+                                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username} + ' (' + ${u.email} + ')'"></option>
+                            </select>
+                            <div class="form-text mt-2 text-primary small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Hệ thống sẽ tự động gửi thông báo đến App/Web của khách hàng ngay sau khi tặng thành công.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">XÁC NHẬN PHÁT HÀNH</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Gửi thông báo | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Hệ thống thông báo khách hàng</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-paper-plane text-success me-2"></i>Tạo thông báo mới</h5>
+        </div>
+        <div class="card-body p-4">
+            <form th:action="@{/admin/notifications/send}" method="post">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Đối tượng nhận tin</label>
+                        <select name="userId" class="form-select rounded-pill">
+                            <option value="">-- Gửi cho TẤT CẢ NGƯỜI DÙNG (Global) --</option>
+                            <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username} + ' (' + ${user.email} + ')'"></option>
+                        </select>
+                        <div class="form-text small mt-2">Chọn một khách hàng cụ thể hoặc để trống để gửi cho toàn bộ hệ thống.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Phân loại thông báo</label>
+                        <select name="type" class="form-select rounded-pill">
+                            <option value="SYSTEM">Hệ thống & Tài khoản</option>
+                            <option value="PROMOTION">Khuyến mãi & Ưu đãi</option>
+                            <option value="NEWS">Tin tức & Sự kiện</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Tiêu đề (Hiển thị đầu tiên)</label>
+                        <input type="text" name="title" class="form-control rounded-pill" placeholder="Ví dụ: Bạn có quà tặng mới từ Tea & Coffee..." required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Nội dung chi tiết</label>
+                        <textarea name="content" class="form-control rounded-4" rows="5" placeholder="Viết thông điệp gửi đến khách hàng..." required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Đường dẫn liên kết (Tùy chọn)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light rounded-start-pill border-end-0">https://...</span>
+                            <input type="text" name="link" class="form-control rounded-end-pill" placeholder="Ví dụ: /user/vouchers">
+                        </div>
+                        <div class="form-text small mt-2">Người dùng sẽ được chuyển hướng đến trang này khi nhấn vào thông báo.</div>
+                    </div>
+                    <div class="col-12 mt-4 text-end">
+                        <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-share-square me-2"></i> GỬI THÔNG BÁO NGAY
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

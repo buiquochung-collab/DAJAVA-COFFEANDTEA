@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Thanh toán MoMo | Tea & Coffee</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5 text-center">
+        <div class="card shadow-sm p-5 border-0 rounded-4 mx-auto" style="max-width: 600px;">
+            <div class="mb-4">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" width="80" class="mb-3">
+                <h2 class="fw-bold text-danger">THANH TOÁN QUA VÍ MOMO</h2>
+            </div>
+            
+            <div class="alert alert-danger rounded-4 py-2 mb-4">
+                <i class="fas fa-clock me-2"></i>Mã hết hạn sau: <span id="countdown" class="fw-bold">10:00</span>
+            </div>
+
+            <div id="qrContent">
+                <div class="bg-white p-3 rounded-4 shadow-sm d-inline-block mb-4">
+                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=2|99|0942367010|BUI%20QUOC%20HUNG||0|0|' + ${order.totalAmount.stripTrailingZeros().toPlainString()} + '|Tea & Coffee%20Order%20' + ${order.id} + '|transfer_myqr'" 
+                         class="img-fluid" style="max-width: 250px;" alt="MoMo QR">
+                </div>
+                
+                <div class="payment-details text-start bg-light p-4 rounded-4 mb-4">
+                    <p class="mb-2">Mã đơn hàng: <strong class="text-danger" th:text="'#' + ${order.id}"></strong></p>
+                    <p class="mb-2">Số tiền: <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></strong></p>
+                    <hr>
+                    <p class="mb-1 small"><strong>Chủ tài khoản:</strong> BUI QUOC HUNG</p>
+                    <p class="mb-1 small"><strong>Số điện thoại:</strong> 0942367010</p>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="successMessage" style="display: none;" class="py-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h2 class="fw-bold text-success">THANH TOÁN THÀNH CÔNG!</h2>
+                <p class="lead mt-3">Đơn hàng của bạn đã được hệ thống xác nhận.</p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="/user/orders" class="btn btn-success btn-lg rounded-pill fw-bold">XEM ĐƠN HÀNG</a>
+                    <a href="/" class="btn btn-link text-success text-decoration-none fw-bold">Tiếp tục mua sắm</a>
+                </div>
+            </div>
+
+            <div id="expiredMessage" style="display: none;" class="py-5">
+                <i class="fas fa-exclamation-circle text-danger fa-4x mb-3"></i>
+                <h4 class="fw-bold text-danger">Giao dịch đã hết hạn</h4>
+                <p class="text-muted">Vui lòng quay lại và thực hiện đặt hàng lại.</p>
+                <a href="/menu" class="btn btn-outline-danger px-5 rounded-pill mt-3">Quay về Menu</a>
+            </div>
+
+            <div id="waitingText">
+                <p class="text-muted small mb-4"><i class="fas fa-spinner fa-spin me-2"></i>Đang đợi hệ thống xác nhận thanh toán...</p>
+                <div class="d-grid">
+                    <a th:href="@{/user/orders}" class="btn btn-outline-danger btn-lg rounded-pill fw-bold">QUAY LẠI ĐƠN HÀNG</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const orderId = [[${order.id}]];
+        
+        function checkOrderStatus() {
+            fetch(`/api/orders/${orderId}/status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isConfirmed) {
+                        window.location.href = `/cart/order-success/${orderId}`;
+                    } else {
+                        // Check again after 3 seconds
+                        setTimeout(checkOrderStatus, 3000);
+                    }
+                })
+                .catch(error => console.error('Error checking order status:', error));
+        }
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            window.timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                display.textContent = minutes + ":" + seconds;
+                if (--timer < 0) {
+                    clearInterval(window.timerInterval);
+                    document.getElementById('qrContent').style.display = 'none';
+                    document.getElementById('waitingText').style.display = 'none';
+                    document.getElementById('expiredMessage').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            var tenMinutes = 60 * 10, display = document.querySelector('#countdown');
+            startTimer(tenMinutes, display);
+            // Start checking for admin confirmation
+            checkOrderStatus();
+        };
+    </script>
+</div>
+</body>
+</html>

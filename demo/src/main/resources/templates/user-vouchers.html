@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Ưu đãi của bạn | Tea & Coffee</title>
+    <style>
+        .voucher-page-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            min-height: 600px;
+        }
+        
+        .voucher-item-box {
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .voucher-item-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: var(--pl-green);
+        }
+        
+        .voucher-header {
+            background: linear-gradient(135deg, var(--pl-green), #00a54d);
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .qr-section {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px dashed #ddd;
+        }
+        .qr-code-img {
+            width: 120px;
+            height: 120px;
+            background: white;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .voucher-details {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .terms-box {
+            font-size: 0.75rem;
+            color: #777;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        /* Sidebar Styles */
+        .user-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f0f0f0;
+        }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .sidebar-menu-item i {
+            width: 25px;
+            margin-right: 10px;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+        .sidebar-menu-item:hover { background: #f8f9fa; color: var(--pl-green); }
+        .sidebar-menu-item.active { background: rgba(0,106,49,0.05); color: var(--pl-green); font-weight: 700; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="user-sidebar">
+                    <div class="user-brief d-flex align-items-center mb-4 border-bottom pb-3" th:if="${user != null}">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-3x text-success opacity-50"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="fw-bold mb-0 text-truncate" th:text="${user.fullName ?: user.username}"></h6>
+                            <small class="text-muted" th:text="${user.membershipRank}"></small>
+                        </div>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a th:href="@{/user/profile}" class="sidebar-menu-item">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                        <a th:href="@{/user/membership}" class="sidebar-menu-item">
+                            <i class="fas fa-id-card"></i> Khách hàng thành viên
+                        </a>
+                        <a th:href="@{/user/orders}" class="sidebar-menu-item">
+                            <i class="fas fa-history"></i> Lịch sử đơn hàng
+                        </a>
+                        <a th:href="@{/user/vouchers}" class="sidebar-menu-item active">
+                            <i class="fas fa-gift"></i> Ưu đãi của bạn
+                        </a>
+                        <hr class="my-3">
+                        <a th:href="@{/logout}" class="sidebar-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="voucher-page-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h4 class="fw-bold mb-0 text-success">KHO ƯU ĐÃI CỦA TÔI</h4>
+                        <span class="badge bg-success rounded-pill px-3" th:text="${userVouchers != null ? userVouchers.size() : 0} + ' Ưu đãi'"></span>
+                    </div>
+
+                    <div th:if="${userVouchers == null or userVouchers.empty}" class="text-center py-5">
+                        <i class="fas fa-ticket-alt fa-4x text-muted mb-3 opacity-25"></i>
+                        <h5 class="text-muted">Bạn chưa có mã giảm giá nào hiện dụng</h5>
+                        <p class="small text-muted">Hãy tham gia các chương trình tích điểm để nhận thêm nhiều ưu đãi nhé!</p>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6 col-xl-4" th:each="uv : ${userVouchers}">
+                            <div class="voucher-item-box rounded-4 shadow-sm h-100">
+                                <div class="voucher-header">
+                                    <div class="small opacity-75 text-uppercase fw-bold mb-1">Giảm trực tiếp</div>
+                                    <h3 class="fw-bold mb-0" th:text="${uv.voucher.discountType == 'PERCENT' ? uv.voucher.discountAmount + '%' : #numbers.formatDecimal(uv.voucher.discountAmount/1000, 0, 'COMMA', 0, 'POINT') + 'K'}"></h3>
+                                </div>
+                                
+                                <div class="qr-section">
+                                    <!-- QR Code for staff to scan (Value: UserVoucher ID or Code) -->
+                                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + ${uv.voucher.code} + '-' + ${uv.id}" 
+                                         class="qr-code-img mb-2" alt="Voucher QR">
+                                    <div class="extra-small text-muted" style="font-size: 0.65rem;">ID Ưu đãi: <span th:text="${uv.voucher.code} + '-' + ${uv.id}"></span></div>
+                                </div>
+                                
+                                <div class="voucher-details">
+                                    <h6 class="fw-bold text-dark mb-2 text-uppercase" th:text="${uv.voucher.code}">CODE</h6>
+                                    <p class="small text-muted mb-2" th:text="${uv.voucher.description}">Mô tả...</p>
+                                    
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="small text-dark">
+                                            <i class="far fa-calendar-check me-2 text-success"></i>Bắt đầu: 
+                                            <span th:text="${uv.voucher.startDate != null ? #temporals.format(uv.voucher.startDate, 'dd/MM/yyyy') : 'Đang hiệu lực'}"></span>
+                                        </div>
+                                        <div class="small text-danger fw-bold">
+                                            <i class="far fa-calendar-times me-2"></i>Kết thúc: 
+                                            <span th:text="${#temporals.format(uv.voucher.expiryDate, 'dd/MM/yyyy')}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="terms-box" th:if="${uv.voucher.terms != null}">
+                                        <div class="fw-bold mb-1" style="font-size: 0.65rem;">ĐIỀU KIỆN SỬ DỤNG:</div>
+                                        <div th:text="${uv.voucher.terms}">Điều kiện...</div>
+                                    </div>
+                                    
+                                    <div class="mt-3 d-grid">
+                                        <button class="btn btn-outline-success btn-sm rounded-pill copy-btn" th:data-code="${uv.voucher.code}">SAO CHÉP MÃ</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyBtns = document.querySelectorAll('.copy-btn');
+            copyBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = this.innerText;
+                        this.innerText = 'ĐÃ SAO CHÉP!';
+                        setTimeout(() => {
+                            this.innerText = originalText;
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

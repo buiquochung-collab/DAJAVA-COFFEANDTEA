@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Thanh toán | Tea & Coffee</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <h2 class="mb-5 text-center fw-bold text-success text-uppercase">Xác nhận đặt hàng</h2>
+        
+        <div class="row g-4">
+            <!-- Left: Shipping & Payment Info -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-4 rounded-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <form th:action="@{/cart/checkout}" method="post" id="checkoutForm">
+                            <h5 class="fw-bold mb-4 border-bottom pb-2 text-success">
+                                <i class="fas fa-truck me-2"></i>PHƯƠNG THỨC NHẬN HÀNG
+                            </h5>
+                            
+                            <div class="delivery-methods mb-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <input type="radio" class="btn-check" name="deliveryMethod" id="delStore" value="STORE" 
+                                               th:checked="${deliveryMethod == 'STORE'}" onchange="updateDeliveryUI()">
+                                        <label class="btn btn-outline-success w-100 p-3 rounded-4 d-flex align-items-center gap-3" for="delStore">
+                                            <i class="fas fa-store fa-lg"></i>
+                                            <span class="small fw-bold">Nhận tại cửa hàng (0đ)</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="radio" class="btn-check" name="deliveryMethod" id="delHome" value="DELIVERY"
+                                               th:checked="${deliveryMethod == 'DELIVERY' or deliveryMethod == null}" onchange="updateDeliveryUI()">
+                                        <label class="btn btn-outline-success w-100 p-3 rounded-4 d-flex align-items-center gap-3" for="delHome">
+                                            <i class="fas fa-motorcycle fa-lg"></i>
+                                            <span class="small fw-bold">Giao hàng tận nơi (15.000đ)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="shippingInfoSection">
+                                <h5 class="fw-bold mb-4 border-bottom pb-2 text-success mt-4">
+                                    <i class="fas fa-map-marker-alt me-2"></i>THÔNG TIN GIAO HÀNG
+                                </h5>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-bold">Họ và tên người nhận <span class="text-danger">*</span></label>
+                                        <input type="text" id="inputFullName" name="fullName" class="form-control rounded-3 border-success-subtle" 
+                                               th:value="${fullName}" required placeholder="">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label small fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="tel" id="inputPhone" name="phone" class="form-control rounded-3 border-success-subtle" 
+                                               th:value="${phone}" required placeholder="">
+                                    </div>
+                                    <div class="col-12 mb-4" id="addressField">
+                                        <label class="form-label small fw-bold">Địa chỉ nhận hàng chi tiết <span class="text-danger">*</span></label>
+                                        <textarea id="inputAddress" name="shippingAddress" class="form-control rounded-3 border-success-subtle" 
+                                                  rows="3" th:text="${address}" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="fw-bold mb-4 border-bottom pb-2 text-success mt-4">
+                                <i class="fas fa-credit-card me-2"></i>PHƯƠNG THỨC THANH TOÁN
+                            </h5>
+                            
+                            <div class="payment-methods mb-4">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="paymentMethod" id="payCOD" value="COD" 
+                                               th:checked="${paymentMethod == 'COD' or paymentMethod == null}">
+                                        <label class="btn btn-outline-success w-100 p-3 rounded-4 d-flex flex-column align-items-center gap-2" for="payCOD">
+                                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                                            <span class="small fw-bold">Tiền mặt</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="paymentMethod" id="payBank" value="BANK_TRANSFER"
+                                               th:checked="${paymentMethod == 'BANK_TRANSFER'}">
+                                        <label class="btn btn-outline-primary w-100 p-3 rounded-4 d-flex flex-column align-items-center gap-2" for="payBank">
+                                            <i class="fas fa-university fa-2x"></i>
+                                            <span class="small fw-bold">Chuyển khoản</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="radio" class="btn-check" name="paymentMethod" id="payMoMo" value="MOMO"
+                                               th:checked="${paymentMethod == 'MOMO'}">
+                                        <label class="btn btn-outline-danger w-100 p-3 rounded-4 d-flex flex-column align-items-center gap-2" for="payMoMo">
+                                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" width="30">
+                                            <span class="small fw-bold">Ví MoMo</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Membership Points -->
+                            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-light" th:if="${user != null and user.points >= 100}">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-2 small text-success"><i class="fas fa-star me-2"></i>ƯU ĐÃI THÀNH VIÊN</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="small fw-bold">Bạn đang có <span class="text-success" th:text="${user.points}">0</span> điểm</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">Đổi 100 điểm lấy 1 ly nước Size M miễn phí.</div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm rounded-pill px-3" 
+                                                th:classappend="${session.redeemPoints == true ? 'btn-success' : 'btn-outline-success'}"
+                                                onclick="toggleRedeemPoints()">
+                                            <i class="fas me-1" th:classappend="${session.redeemPoints == true ? 'fa-check-circle' : 'fa-gift'}"></i>
+                                            <span th:text="${session.redeemPoints == true ? 'Đã dùng' : 'Dùng 100đ'}">Dùng</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Voucher Selection -->
+                            <h5 class="fw-bold mb-3 text-success mt-5">
+                                <i class="fas fa-ticket-alt me-2"></i>MÃ GIẢM GIÁ
+                            </h5>
+                            <div class="input-group mb-4">
+                                <select id="checkoutVoucher" class="form-select rounded-start-pill border-success-subtle">
+                                    <option value="">-- Chọn ưu đãi của bạn --</option>
+                                    <option th:each="uv : ${userVouchers}" 
+                                            th:value="${uv.voucher.code}" 
+                                            th:text="${uv.voucher.code + ' - ' + uv.voucher.description}"
+                                            th:selected="${appliedVoucher != null and appliedVoucher.code == uv.voucher.code}">
+                                    </option>
+                                </select>
+                                <button type="button" class="btn btn-success rounded-end-pill px-4" onclick="applyVoucherCheckout()">ÁP DỤNG</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 rounded-4 p-4 sticky-top" style="top: 2rem;">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">TỔNG HÓA ĐƠN</h5>
+                    
+                    <div class="checkout-items mb-4" style="max-height: 200px; overflow-y: auto;">
+                        <div th:each="item : ${cartItems}" class="d-flex justify-content-between mb-2 small">
+                            <span th:text="${item.productName} + ' x' + ${item.quantity}"></span>
+                            <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </div>
+                    </div>
+
+                    <div class="summary-details bg-light p-3 rounded-4 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Tạm tính:</span>
+                            <span class="small" th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Phí giao hàng:</span>
+                            <span class="small text-success" th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT') + ' đ'}">15,000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">VAT (10%):</span>
+                            <span class="small" th:text="${#numbers.formatDecimal(vatAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-danger fw-bold" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                            <span class="small">Giảm giá:</span>
+                            <span class="small" th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0 fw-bold">TỔNG CỘNG</h4>
+                            <h4 class="mb-0 text-success fw-bold" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + ' đ'}"></h4>
+                        </div>
+                    </div>
+
+                    <button type="submit" form="checkoutForm" class="btn btn-success btn-lg w-100 py-3 rounded-pill fw-bold shadow-sm">
+                        XÁC NHẬN ĐẶT HÀNG
+                    </button>
+                    <a th:href="@{/cart}" class="btn btn-link w-100 text-muted text-decoration-none small mt-2">Quay lại giỏ hàng</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function updateDeliveryUI() {
+            const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+            const addressField = document.getElementById('addressField');
+            const shippingInfoSection = document.getElementById('shippingInfoSection');
+            
+            // Nếu nhận tại cửa hàng thì không bắt buộc nhập địa chỉ và ẩn nó đi
+            if (method === 'STORE') {
+                addressField.style.display = 'none';
+                document.getElementById('inputAddress').required = false;
+            } else {
+                addressField.style.display = 'block';
+                document.getElementById('inputAddress').required = true;
+            }
+
+            // Gửi lại form để tính toán lại phí ship (re-render từ server)
+            applyVoucherCheckout();
+        }
+
+        function toggleRedeemPoints() {
+            const currentRedeem = [[${session.redeemPoints == true}]];
+            const fullName = document.getElementById('inputFullName').value;
+            const phone = document.getElementById('inputPhone').value;
+            const address = document.getElementById('inputAddress').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/cart/redeem-points';
+            
+            const params = {
+                'redeem': !currentRedeem,
+                'fullName': fullName,
+                'phone': phone,
+                'shippingAddress': address,
+                'paymentMethod': paymentMethod,
+                'deliveryMethod': deliveryMethod
+            };
+
+            for (const key in params) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = params[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function applyVoucherCheckout() {
+            const code = document.getElementById('checkoutVoucher').value;
+            const fullName = document.getElementById('inputFullName').value;
+            const phone = document.getElementById('inputPhone').value;
+            const address = document.getElementById('inputAddress').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/cart/apply-voucher';
+            
+            const params = {
+                'voucherCode': code,
+                'fullName': fullName,
+                'phone': phone,
+                'shippingAddress': address,
+                'paymentMethod': paymentMethod,
+                'deliveryMethod': deliveryMethod
+            };
+
+            for (const key in params) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = params[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+            if (method === 'STORE') {
+                document.getElementById('addressField').style.display = 'none';
+                document.getElementById('inputAddress').required = false;
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$LAYOUT_TITLE | $CONTENT_TITLE">Tea & Coffee</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { font-family: 'Montserrat', sans-serif !important; }
+        .nav-link { font-weight: 600; letter-spacing: 0.5px; }
+        
+        /* Notification Dropdown on Hover */
+        .notification-dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+        .notification-item {
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .notification-item:hover {
+            background-color: #f8fdfa;
+        }
+        .notification-item.unread {
+            background-color: #fff9f9;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="main-header shadow-sm">
+    <!-- Top Row -->
+    <div class="header-top py-2 border-bottom border-dark">
+        <div class="container d-flex align-items-center justify-content-between">
+            <!-- Left: Logo & Search -->
+            <div class="d-flex align-items-center flex-grow-1">
+                <a class="navbar-brand py-0 me-4 fw-bold text-success fs-3" th:href="@{/}">
+                    TEA & <span class="text-dark">COFFEE</span>
+                </a>
+                <div class="search-container position-relative flex-grow-1 max-width-500">
+                    <form th:action="@{/search}" method="get" id="searchForm">
+                        <div class="input-group search-bar rounded-pill border overflow-hidden bg-light">
+                            <button type="submit" class="input-group-text bg-transparent border-0 pe-1">
+                                <i class="fas fa-search text-muted"></i>
+                            </button>
+                            <input type="text" name="query" id="mainSearchInput" class="form-control border-0 bg-transparent shadow-none" 
+                                   placeholder="Tìm tên sản phẩm hoặc chữ cái đầu..." autocomplete="off" th:value="${query}">
+                        </div>
+                    </form>
+                    <!-- Search Results Dropdown -->
+                    <div id="searchResultsDropdown" class="dropdown-menu shadow-lg rounded-4 p-0 mt-2 border-0 w-100 overflow-hidden" 
+                         style="display: none; position: absolute; max-height: 400px; overflow-y: auto; z-index: 2000;">
+                        <div id="searchResultsContent"></div>
+                    </div>
+                </div>
+
+                <style>
+                    .search-result-item {
+                        transition: background 0.2s;
+                        border-bottom: 1px solid #f0f0f0;
+                    }
+                    .search-result-item:hover {
+                        background-color: #f8fdfa;
+                    }
+                    .search-result-item:last-child {
+                        border-bottom: none;
+                    }
+                    .search-img-thumb {
+                        width: 50px;
+                        height: 50px;
+                        object-fit: contain;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const searchInput = document.getElementById('mainSearchInput');
+                        const resultsDropdown = document.getElementById('searchResultsDropdown');
+                        const resultsContent = document.getElementById('searchResultsContent');
+                        let timeout = null;
+
+                        searchInput.addEventListener('input', function() {
+                            const query = this.value.trim();
+                            clearTimeout(timeout);
+
+                            if (query.length < 1) {
+                                resultsDropdown.style.display = 'none';
+                                return;
+                            }
+
+                            timeout = setTimeout(() => {
+                                fetch(`/api/search?query=${encodeURIComponent(query)}`)
+                                    .then(response => response.json())
+                                    .then(products => {
+                                        if (products.length > 0) {
+                                            let html = '';
+                                            products.forEach(p => {
+                                                const price = p.priceM != null ? p.priceM : (p.priceL != null ? p.priceL : p.price);
+                                                const formattedPrice = new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+                                                
+                                                html += `
+                                                    <a href="/product/${p.id}" class="text-decoration-none text-dark d-block p-3 search-result-item">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <img src="${p.imageUrl || '/uploads/products/default.png'}" class="search-img-thumb" alt="${p.name}">
+                                                            <div class="flex-grow-1">
+                                                                <div class="fw-bold small mb-0">${p.name}</div>
+                                                                <div class="text-success fw-bold extra-small" style="font-size: 0.75rem;">${formattedPrice}</div>
+                                                            </div>
+                                                            <div class="text-muted small"><i class="fas fa-chevron-right"></i></div>
+                                                        </div>
+                                                    </a>
+                                                `;
+                                            });
+                                            resultsContent.innerHTML = html;
+                                            resultsDropdown.style.display = 'block';
+                                        } else {
+                                            resultsContent.innerHTML = '<div class="p-4 text-center text-muted small"><i class="fas fa-search mb-2 d-block fa-lg"></i>Không tìm thấy sản phẩm phù hợp</div>';
+                                            resultsDropdown.style.display = 'block';
+                                        }
+                                    });
+                            }, 300);
+                        });
+
+                        // Hide dropdown when clicking outside
+                        document.addEventListener('click', function(e) {
+                            if (!searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
+                                resultsDropdown.style.display = 'none';
+                            }
+                        });
+                        
+                        // Show dropdown when focus back
+                        searchInput.addEventListener('focus', function() {
+                            if (this.value.trim().length >= 1) {
+                                resultsDropdown.style.display = 'block';
+                            }
+                        });
+                    });
+                </script>
+            </div>
+            <!-- Right: Notifications, User -->
+            <div class="d-flex align-items-center">
+                
+                <!-- Notification Dropdown -->
+                <div class="dropdown me-3 notification-dropdown" th:if="${currentUser != null}">
+                    <a href="javascript:void(0)" class="text-success position-relative border border-success rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="far fa-envelope"></i>
+                        <span th:if="${unreadNotificationsCount != null && unreadNotificationsCount > 0}" 
+                              th:text="${unreadNotificationsCount}"
+                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                              style="font-size: 0.6rem;">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-0 overflow-hidden" style="width: 350px;">
+                        <div class="p-3 bg-success text-white d-flex justify-content-between align-items-center">
+                            <span class="fw-bold small"><i class="fas fa-bell me-2"></i>Thông báo của bạn</span>
+                            <form th:action="@{/notifications/read-all}" method="post" class="m-0">
+                                <button type="submit" class="btn btn-link text-white p-0 small text-decoration-none border-0" style="font-size: 0.7rem;">Đọc tất cả</button>
+                            </form>
+                        </div>
+                        
+                        <div class="notification-scroll" style="max-height: 450px; overflow-y: auto;">
+                            <!-- Section: Orders -->
+                            <div class="px-3 py-2 bg-light border-bottom">
+                                <span class="fw-bold text-dark" style="font-size: 0.75rem;">ĐƠN HÀNG</span>
+                            </div>
+                            <div class="notification-section">
+                                <div th:if="${#lists.isEmpty(orderNotifications)}" class="p-3 text-center text-muted small">
+                                    Không có thông báo đơn hàng mới.
+                                </div>
+                                <a th:each="n : ${orderNotifications}"
+                                   th:href="@{'/notifications/read-and-redirect/' + ${n.id}}"
+                                   class="dropdown-item p-3 notification-item" th:classappend="${!n.isRead ? 'unread' : ''}">
+                                    <div class="d-flex gap-2">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-shopping-bag text-primary"></i>
+                                        </div>
+                                        <div class="flex-grow-1 text-wrap">
+                                            <div class="fw-bold small mb-1" th:text="${n.title}">Tiêu đề</div>
+                                            <div class="text-muted extra-small" style="font-size: 0.75rem;" th:text="${n.content}">Nội dung...</div>
+                                            <div class="text-muted mt-1" style="font-size: 0.65rem;" th:text="${#temporals.format(n.createdAt, 'dd/MM HH:mm')}">Thời gian</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Section: News & Promotions -->
+                            <div class="px-3 py-2 bg-light border-bottom border-top">
+                                <span class="fw-bold text-dark" style="font-size: 0.75rem;">TIN TỨC & KHUYẾN MÃI</span>
+                            </div>
+                            <div class="notification-section">
+                                <div th:if="${#lists.isEmpty(newsNotifications)}" class="p-3 text-center text-muted small">
+                                    Không có tin tức mới.
+                                </div>
+                                <a th:each="n : ${newsNotifications}"
+                                   th:href="@{'/notifications/read-and-redirect/' + ${n.id}}"
+                                   class="dropdown-item p-3 notification-item" th:classappend="${!n.isRead ? 'unread' : ''}">
+                                    <div class="d-flex gap-2">
+                                        <div class="flex-shrink-0">
+                                            <i th:class="${n.type == 'PROMOTION' ? 'fas fa-gift text-danger' : 'fas fa-bullhorn text-warning'}"></i>
+                                        </div>
+                                        <div class="flex-grow-1 text-wrap">
+                                            <div class="fw-bold small mb-1" th:text="${n.title}">Tiêu đề</div>
+                                            <div class="text-muted extra-small" style="font-size: 0.75rem;" th:text="${n.content}">Nội dung...</div>
+                                            <div class="text-muted mt-1" style="font-size: 0.65rem;" th:text="${#temporals.format(n.createdAt, 'dd/MM HH:mm')}">Thời gian</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        </div>                </div>
+
+                <!-- User Dropdown -->
+                <div class="dropdown" th:if="${currentUser == null}">
+                    <a th:href="@{/login}" class="text-success">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                </div>
+                <div class="dropdown" th:if="${currentUser != null}">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle fa-2x text-success"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 p-2" style="min-width: 250px;">
+                        <li class="p-3 border-bottom mb-2" th:if="${currentUser != null}">
+                            <h6 class="fw-bold mb-0 text-success" th:text="${currentUser.fullName ?: currentUser.username}"></h6>
+                            <small class="text-muted" th:text="${currentUser.membershipRank} + ' Member'"></small>
+                        </li>
+                        <li><a class="dropdown-item rounded-3 py-2" th:href="@{/user/profile}"><i class="fas fa-user-edit me-2 opacity-50"></i> Thông tin cá nhân</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" th:href="@{/user/membership}"><i class="fas fa-id-card me-2 opacity-50"></i> Khách hàng thành viên</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" th:href="@{/user/vouchers}"><i class="fas fa-gift me-2 opacity-50"></i> Ưu đãi của bạn</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" th:href="@{/user/orders}"><i class="fas fa-box me-2 opacity-50"></i> Lịch sử đơn hàng</a></li>
+                        <li sec:authorize="hasAnyRole('ADMIN', 'CASHIER', 'STOCK_MANAGER')">
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item rounded-3 py-2 text-danger" th:href="@{/admin}"><i class="fas fa-user-shield me-2 opacity-50"></i> Quản trị hệ thống</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item rounded-3 py-2 border-0 bg-transparent w-100 text-start">
+                                    <i class="fas fa-sign-out-alt me-2 opacity-50"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bottom Row (Navigation) -->
+    <nav class="navbar navbar-expand-lg py-1 bg-white position-relative">
+        <div class="container">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav w-100 justify-content-center align-items-center">
+                    <li class="nav-item"><a class="nav-link px-3" th:href="@{/}">TRANG CHỦ</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" th:href="@{/menu}">MENU</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" th:href="@{/promotions}">KHUYẾN MÃI</a></li>
+                    <li class="nav-item border-start border-dark ms-2 ps-3">
+                        <a class="nav-link" th:href="@{/membership}">HỘI VIÊN</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Floating Action Buttons -->
+<div class="fixed-bottom-right p-4 d-flex flex-column gap-3 align-items-end" style="z-index: 1050;">
+    <a th:href="@{/cart}" class="floating-btn bg-success text-white shadow-lg d-flex align-items-center justify-content-center rounded-circle" style="width: 55px; height: 55px; text-decoration: none;">
+        <i class="fas fa-shopping-cart fa-lg"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+              th:text="${cartItemCount}" style="font-size: 0.7rem;">0</span>
+    </a>
+</div>
+
+<!-- Toast Notifications Container -->
+<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 2000;">
+    <div th:if="${successMessage}" class="toast show align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" th:text="${successMessage}"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div th:if="${errorMessage}" class="toast show align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" th:text="${errorMessage}"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div layout:fragment="content"></div>
+
+<!-- Footer -->
+<footer class="footer mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Left: Contact Info -->
+            <div class="col-md-8">
+                <h5 class="mb-4">THÔNG TIN LIÊN HỆ</h5>
+                <p class="small opacity-75 mb-2"><strong>TEA & COFFEE HERITAGE</strong></p>
+                <p class="small opacity-75 mb-1"><strong>Địa chỉ:</strong> Khu phố 6, P. Linh Trung, TP. Thủ Đức, Hồ Chí Minh.</p>
+                <p class="small opacity-75 mb-1"><strong>Hotline Đặt hàng:</strong> 1900 123 456</p>
+                <p class="small opacity-75 mb-1"><strong>Email:</strong> support@teacoffee.com.vn</p>
+            </div>
+            
+            <!-- Right: Support & Policies -->
+            <div class="col-md-4">
+                <h5 class="mb-4">ĐIỀU KHOẢN SỬ DỤNG</h5>
+                <ul class="list-unstyled small opacity-75">
+                    <li class="mb-2">
+                        <a th:href="@{/ordering-policy}" class="text-white text-decoration-none">
+                            <i class="fas fa-chevron-right me-2 small"></i>Điều khoản và điều kiện
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a th:href="@{/privacy-policy}" class="text-white text-decoration-none">
+                            <i class="fas fa-chevron-right me-2 small"></i>Chính sách bảo mật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-5 opacity-25">
+        <div class="text-center small opacity-50">
+            <p>&copy; 2026 Tea & Coffee. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-hide toasts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        var toasts = document.querySelectorAll('.toast');
+        toasts.forEach(function (toastEl) {
+            var bsToast = new bootstrap.Toast(toastEl, { delay: 5000 });
+            bsToast.show();
+            setTimeout(function() {
+                bsToast.hide();
+            }, 5000);
+        });
+    });
+</script>
+</body>
+</html>

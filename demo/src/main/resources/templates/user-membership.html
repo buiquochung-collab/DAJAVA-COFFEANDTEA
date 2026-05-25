@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Hạng hội viên | Tea & Coffee</title>
+    <style>
+        :root {
+            --pl-green: #006a31;
+            --vip-gold: #c5a059;
+            --diamond-blue: #004d7c;
+        }
+        
+        /* Simplified Membership Card */
+        .membership-card-new {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-brand {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+        }
+        .rank-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            font-weight: 700;
+        }
+        .rank-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .rank-MEMBER { color: var(--pl-green); }
+        .rank-VIP { color: var(--vip-gold); }
+        .rank-DIAMOND { color: var(--diamond-blue); }
+
+        /* Roadmap Styles */
+        .roadmap-container {
+            position: relative;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+        .roadmap-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .roadmap-progress {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: var(--pl-green);
+            transform: translateY(-50%);
+            z-index: 2;
+            transition: width 1s ease-in-out;
+        }
+        .roadmap-steps {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            z-index: 3;
+        }
+        .step-node {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 4px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #dee2e6;
+            transition: all 0.3s;
+        }
+        .step-node.active {
+            border-color: var(--pl-green);
+            color: var(--pl-green);
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0,106,49,0.2);
+        }
+        .step-node.completed {
+            background: var(--pl-green);
+            border-color: var(--pl-green);
+            color: white;
+        }
+        .step-label {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #888;
+        }
+        .step-label.active { color: var(--pl-green); }
+
+        /* Benefit Box */
+        .benefit-section {
+            background: #fcfcfc;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #f0f0f0;
+        }
+        .benefit-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            height: 100%;
+            border: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--pl-green);
+        }
+        
+        /* History Section */
+        .history-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+        .history-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .points-plus { color: var(--pl-green); font-weight: 700; }
+        .points-minus { color: #dc3545; font-weight: 700; }
+        
+        /* Sidebar Styles (Copy from profile) */
+        .user-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f0f0f0;
+        }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .sidebar-menu-item i {
+            width: 25px;
+            margin-right: 10px;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+        .sidebar-menu-item:hover { background: #f8f9fa; color: var(--pl-green); }
+        .sidebar-menu-item.active { background: rgba(0,106,49,0.05); color: var(--pl-green); font-weight: 700; }
+        .user-brief { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="user-sidebar">
+                    <div class="user-brief d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-3x text-success opacity-50"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="fw-bold mb-0 text-truncate" th:text="${currentUser.fullName ?: currentUser.username}"></h6>
+                            <small class="text-muted" th:text="${currentUser.membershipRank}"></small>
+                        </div>
+                    </div>
+                    <div class="sidebar-menu">
+                        <a th:href="@{/user/profile}" class="sidebar-menu-item">
+                            <i class="fas fa-user"></i> Thông tin cá nhân
+                        </a>
+                        <a th:href="@{/user/membership}" class="sidebar-menu-item active">
+                            <i class="fas fa-id-card"></i> Khách hàng thành viên
+                        </a>
+                        <a th:href="@{/user/orders}" class="sidebar-menu-item">
+                            <i class="fas fa-history"></i> Lịch sử đơn hàng
+                        </a>
+                        <a th:href="@{/user/vouchers}" class="sidebar-menu-item">
+                            <i class="fas fa-gift"></i> Ưu đãi của bạn
+                        </a>
+                        <hr class="my-3">
+                        <a th:href="@{/logout}" class="sidebar-menu-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-success">CHƯƠNG TRÌNH THÀNH VIÊN</h4>
+                        <p class="text-muted small mb-0">Tích lũy điểm và hưởng các ưu đãi đặc quyền</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Membership Card & QR -->
+                    <div class="col-md-12">
+                        <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4" style="background: linear-gradient(135deg, #006a31 0%, #00a54d 100%); color: white;">
+                            <div class="card-body p-4 p-md-5 position-relative">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-4">
+                                            <img src="https://phuclong.com.vn/uploads/dish/6620f4c93f0b35-trasuaphuclong.png" width="80" class="me-3 filter-white">
+                                            <div>
+                                                <h4 class="fw-bold mb-0 text-uppercase">Tea & Coffee</h4>
+                                                <small class="opacity-75">Thẻ thành viên điện tử</small>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4">
+                                            <div class="rank-label text-white opacity-75">Hạng hội viên</div>
+                                            <h2 class="fw-bold mb-0" th:text="${currentUser.membershipRank}">MEMBER</h2>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="small opacity-75">Họ tên</div>
+                                                <div class="fw-bold" th:text="${currentUser.fullName ?: currentUser.username}">Username</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="small opacity-75">Mã thành viên</div>
+                                                <div class="fw-bold" th:text="${currentUser.username}">#123456</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center mt-4 mt-md-0">
+                                        <div class="bg-white p-3 rounded-4 d-inline-block shadow-sm">
+                                            <!-- QR Code API (qrserver.com) -->
+                                            <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + ${currentUser.username}" 
+                                                 width="140" height="140" alt="Membership QR">
+                                            <div class="text-dark small fw-bold mt-2">QUÉT ĐỂ TÍCH ĐIỂM</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Point Stats (Compact) -->
+                    <div class="col-md-5">
+                        <div class="membership-card-new h-100">
+                            <span class="rank-label">Điểm hiện có</span>
+                            <div class="d-flex align-items-baseline gap-2 mt-2">
+                                <h1 class="fw-bold mb-0 text-success" th:text="${currentUser.points}">0</h1>
+                                <span class="text-muted fw-bold">điểm</span>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-top">
+                                <div th:with="pts=${currentUser.points}">
+                                    <div th:if="${currentUser.membershipRank == 'MEMBER'}" class="bg-success-subtle p-3 rounded-4">
+                                        <p class="small mb-0 text-success">
+                                            <i class="fas fa-arrow-up me-2"></i>
+                                            Chỉ còn <b th:text="${1000 - pts}">1000</b> điểm nữa để lên hạng <b>VIP</b>
+                                        </p>
+                                    </div>
+                                    <div th:if="${currentUser.membershipRank == 'VIP'}" class="bg-warning-subtle p-3 rounded-4">
+                                        <p class="small mb-0 text-warning-emphasis">
+                                            <i class="fas fa-arrow-up me-2"></i>
+                                            Chỉ còn <b th:text="${3000 - pts}">2000</b> điểm nữa để lên hạng <b>DIAMOND</b>
+                                        </p>
+                                    </div>
+                                    <div th:if="${currentUser.membershipRank == 'DIAMOND'}" class="bg-primary-subtle p-3 rounded-4">
+                                        <p class="small mb-0 text-primary">
+                                            <i class="fas fa-crown me-2"></i>
+                                            Chúc mừng! Bạn đã đạt hạng cao nhất.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap Section -->
+                    <div class="col-md-7">
+                        <div class="bg-white border rounded-4 p-4 h-100 d-flex flex-column justify-content-center">
+                            <h6 class="fw-bold mb-4 text-center">LỘ TRÌNH THĂNG HẠNG</h6>
+                            <div class="roadmap-container mx-3">
+                                <div class="roadmap-line"></div>
+                                <div class="roadmap-progress" th:with="pts=${currentUser.points}"
+                                     th:style="'width: ' + (${pts < 1000 ? (pts * 50 / 1000) : (pts < 3000 ? (50 + (pts - 1000) * 50 / 2000) : 100)}) + '%'"></div>
+                                <div class="roadmap-steps">
+                                    <div class="position-relative">
+                                        <div class="step-node completed"><i class="fas fa-check"></i></div>
+                                        <span class="step-label active">MEMBER</span>
+                                    </div>
+                                    <div class="position-relative">
+                                        <div th:class="${currentUser.points >= 1000 ? 'step-node completed' : (currentUser.membershipRank == 'VIP' ? 'step-node active' : 'step-node')}">
+                                            <i th:class="${currentUser.points >= 1000 ? 'fas fa-check' : 'fas fa-star'}"></i>
+                                        </div>
+                                        <span th:class="${currentUser.points >= 1000 ? 'step-label active' : 'step-label'}">VIP</span>
+                                    </div>
+                                    <div class="position-relative">
+                                        <div th:class="${currentUser.points >= 3000 ? 'step-node completed' : (currentUser.membershipRank == 'DIAMOND' ? 'step-node active' : 'step-node')}">
+                                            <i th:class="${currentUser.points >= 3000 ? 'fas fa-check' : 'fas fa-gem'}"></i>
+                                        </div>
+                                        <span th:class="${currentUser.points >= 3000 ? 'step-label active' : 'step-label'}">DIAMOND</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4 px-2 small text-muted">
+                                <span>0</span>
+                                <span class="ms-5">1.000 điểm</span>
+                                <span>3.000 điểm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefits Section -->
+                <div class="mt-5">
+                    <h5 class="fw-bold mb-4 border-start border-success border-4 ps-3">ĐẶC QUYỀN HẠNG THÀNH VIÊN</h5>
+                    <div class="row g-4">
+                        <!-- Member Benefits -->
+                        <div class="col-md-4">
+                            <div class="benefit-card">
+                                <h6 class="fw-bold text-success mb-3"><i class="fas fa-user me-2"></i> HẠNG MEMBER</h6>
+                                <ul class="small text-muted ps-3 mb-0">
+                                    <li class="mb-2">Đổi 100 điểm đổi quà lấy ly nước size M.</li>
+                                    <li>Tặng 1 phần bánh trong tháng sinh nhật (khi có phát sinh giao dịch và đạt tối thiểu 100 điểm).</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- VIP Benefits -->
+                        <div class="col-md-4">
+                            <div class="benefit-card border-warning">
+                                <h6 class="fw-bold text-warning mb-3"><i class="fas fa-star me-2"></i> HẠNG VIP</h6>
+                                <ul class="small text-muted ps-3 mb-0">
+                                    <li class="mb-2"><b>Giảm giá 10%</b> Thức uống và <b>3%</b> Sản phẩm (trà & cà phê).</li>
+                                    <li class="mb-2">Đổi 100 điểm đổi quà lấy ly nước size M.</li>
+                                    <li>Tặng 1 phần bánh trong tháng sinh nhật.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- Diamond Benefits -->
+                        <div class="col-md-4">
+                            <div class="benefit-card border-primary">
+                                <h6 class="fw-bold text-primary mb-3"><i class="fas fa-gem me-2"></i> HẠNG DIAMOND</h6>
+                                <ul class="small text-muted ps-3 mb-0">
+                                    <li class="mb-2"><b>Giảm giá 15%</b> Thức uống và <b>5%</b> Sản phẩm (trà & cà phê).</li>
+                                    <li class="mb-2">Đổi 100 điểm đổi quà lấy ly nước size M.</li>
+                                    <li>Tặng 1 phần bánh trong tháng sinh nhật.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="mt-5">
+                    <h5 class="fw-bold mb-4 border-start border-success border-4 ps-3">LỊCH SỬ ĐIỂM</h5>
+                    <div class="history-table">
+                        <div class="history-item bg-light fw-bold small text-muted">
+                            <div style="width: 150px;">Thời gian</div>
+                            <div class="flex-grow-1">Nội dung</div>
+                            <div class="text-end" style="width: 100px;">Thay đổi</div>
+                        </div>
+                        
+                        <!-- Real Data -->
+                        <div th:each="history : ${pointHistory}" class="history-item">
+                            <div class="small text-muted" style="width: 150px;" 
+                                 th:text="${#temporals.format(history.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                            <div class="flex-grow-1 small fw-bold" th:text="${history.description}"></div>
+                            <div th:class="${history.amount > 0 ? 'text-end points-plus' : 'text-end points-minus'}" 
+                                 style="width: 100px;" 
+                                 th:text="${(history.amount > 0 ? '+' : '') + history.amount}"></div>
+                        </div>
+
+                        <div th:if="${pointHistory == null or pointHistory.empty}" class="p-5 text-center text-muted small">
+                            Chưa có lịch sử giao dịch điểm.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
