@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -16,15 +17,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Chuẩn hóa đường dẫn thư mục upload
-        String path = uploadDir.replace("\\", "/");
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
+        // Lấy đường dẫn tuyệt đối của thư mục upload
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+        String pathString = uploadPath.toUri().toString();
         
-        // Map /uploads/** to the physical directory
-        // Sử dụng file:/// cho Windows để đảm bảo tính tương thích
+        // Cấu hình để truy cập ảnh qua URL /uploads/
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:///" + path);
+                .addResourceLocations(pathString);
     }
 }
