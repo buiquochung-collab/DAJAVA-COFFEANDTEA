@@ -100,10 +100,10 @@
                     <!-- Size & Price Preview -->
                     <div class="price-container">
                         <div class="price-toggle">
-                            <span class="size-btn active" 
+                            <span class="size-btn active" data-size="M"
                                   th:data-price="${#numbers.formatDecimal(product.priceM != null ? product.priceM : product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"
                                   onclick="updatePrice(this)">M</span>
-                            <span class="size-btn" th:if="${product.priceL != null}" 
+                            <span class="size-btn" th:if="${product.priceL != null}" data-size="L"
                                   th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"
                                   onclick="updatePrice(this)">L</span>
                         </div>
@@ -112,6 +112,7 @@
 
                     <form th:action="@{/cart/add}" method="post">
                         <input type="hidden" name="productId" th:value="${product.id}">
+                        <input type="hidden" name="size" value="M" class="selected-size">
                         <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm">
                             <i class="fas fa-cart-plus me-2"></i> ĐẶT HÀNG
                         </button>
@@ -149,13 +150,20 @@
 
     <script>
         function updatePrice(element) {
+            const card = element.closest('.product-card');
             const container = element.closest('.price-container');
             const priceText = element.getAttribute('data-price');
+            const size = element.getAttribute('data-size');
+            
             // Update active state
             container.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
+            
             // Update price display
             container.querySelector('.price').innerText = priceText;
+            
+            // Update hidden input in form
+            card.querySelector('.selected-size').value = size;
         }
     </script>
 </div>

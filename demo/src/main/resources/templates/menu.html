@@ -67,10 +67,10 @@
                             <!-- Size & Price Preview -->
                             <div class="price-container">
                                 <div class="price-toggle" th:if="${product.priceM != null or product.priceL != null}">
-                                    <span class="size-btn active" th:if="${product.priceM != null}"
+                                    <span class="size-btn active" th:if="${product.priceM != null}" data-size="M"
                                           th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}"
                                           onclick="updatePrice(this)">M</span>
-                                    <span class="size-btn" th:if="${product.priceL != null}" 
+                                    <span class="size-btn" th:if="${product.priceL != null}" data-size="L"
                                           th:classappend="${product.priceM == null ? 'active' : ''}"
                                           th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"
                                           onclick="updatePrice(this)">L</span>
@@ -86,6 +86,7 @@
 
                             <form th:action="@{/cart/add}" method="post">
                                 <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="size" th:value="${product.priceM != null ? 'M' : 'L'}" class="selected-size">
                                 <button type="submit" class="btn btn-success w-100 rounded-pill py-2 shadow-sm" 
                                         th:disabled="${product.calculatedStock <= 0}"
                                         th:text="${product.calculatedStock > 0 ? 'ĐẶT HÀNG' : 'HẾT HÀNG'}">ĐẶT HÀNG</button>
@@ -102,11 +103,17 @@
 
     <script>
         function updatePrice(element) {
+            const card = element.closest('.product-card');
             const container = element.closest('.price-container');
             const priceText = element.getAttribute('data-price');
+            const size = element.getAttribute('data-size');
+
             container.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
             container.querySelector('.price').innerText = priceText;
+
+            // Update hidden input
+            card.querySelector('.selected-size').value = size;
         }
 
         // Remember scroll position

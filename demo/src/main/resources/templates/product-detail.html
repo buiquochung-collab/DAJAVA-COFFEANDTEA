@@ -182,8 +182,34 @@
                     .review-card { transition: 0.3s; border: 1px solid #f8f9fa !important; }
                     .review-card:hover { border-color: var(--pl-green) !important; transform: scale(1.01); }
                     .extra-small { font-size: 0.75rem; }
-                </style>
-            </div>
+
+                    /* Size Circle Styles */
+                    .size-circle {
+                        width: 45px;
+                        height: 45px;
+                        border-radius: 50%;
+                        border: 2px solid #ddd;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        background: white;
+                        color: #333;
+                    }
+
+                    .form-check-input:checked + .size-circle {
+                        background-color: var(--pl-green);
+                        border-color: var(--pl-green);
+                        color: white;
+                        box-shadow: 0 4px 10px rgba(0, 106, 49, 0.3);
+                    }
+
+                    .size-circle:hover {
+                        border-color: var(--pl-green);
+                    }
+                    </style>            </div>
         </div>
     </div>
 </div>

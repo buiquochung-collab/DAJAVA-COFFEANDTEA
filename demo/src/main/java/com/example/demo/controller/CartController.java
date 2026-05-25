@@ -395,20 +395,46 @@ public class CartController {
                 return (referer != null) ? "redirect:" + referer : "redirect:/menu";
             }
 
-            BigDecimal price = "L".equals(size) ? product.getPriceL() : product.getPriceM();
-            if (price == null) price = product.getPriceM() != null ? product.getPriceM() : product.getPrice();
+            // Tính giá dựa trên size và áp dụng khuyến mãi nếu có
+            BigDecimal basePrice = "L".equals(size) ? product.getPriceL() : product.getPriceM();
+            if (basePrice == null) basePrice = product.getPriceM() != null ? product.getPriceM() : product.getPrice();
             
-            CartItem newItem = CartItem.builder()
-                    .productId(productId)
-                    .productName(product.getName())
-                    .imageUrl(product.getImageUrl())
-                    .quantity(quantity)
-                    .price(price)
-                    .size(size)
-                    .note(note)
-                    .build();
+            BigDecimal finalPrice = basePrice;
+            if (product.getPromotion() != null && product.getPromotion().isCurrentlyActive()) {
+                if (product.getPromotion().getDiscountType() == Promotion.DiscountType.PERCENT) {
+                    BigDecimal discount = basePrice.multiply(product.getPromotion().getDiscountValue()).divide(BigDecimal.valueOf(100));
+                    finalPrice = basePrice.subtract(discount);
+                } else {
+                    finalPrice = basePrice.subtract(product.getPromotion().getDiscountValue()).max(BigDecimal.ZERO);
+                }
+            }
             
-            cart.add(newItem);
+            // Logic gộp sản phẩm: Cùng ID, cùng Size VÀ cùng Ghi chú thì mới gộp
+            boolean merged = false;
+            String normalizedNote = (note != null) ? note.trim() : "";
+            
+            for (CartItem item : cart) {
+                String itemNote = (item.getNote() != null) ? item.getNote().trim() : "";
+                if (item.getProductId().equals(productId) && item.getSize().equals(size) && itemNote.equals(normalizedNote)) {
+                    item.setQuantity(item.getQuantity() + quantity);
+                    merged = true;
+                    break;
+                }
+            }
+
+            if (!merged) {
+                CartItem newItem = CartItem.builder()
+                        .productId(productId)
+                        .productName(product.getName())
+                        .imageUrl(product.getImageUrl())
+                        .quantity(quantity)
+                        .price(finalPrice)
+                        .size(size)
+                        .note(note)
+                        .build();
+                cart.add(newItem);
+            }
+            
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm " + product.getName() + " vào giỏ hàng.");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm.");
@@ -429,30 +455,45 @@ public class CartController {
     }
 
     @PostMapping("/update")
-    public String updateCart(@RequestParam Long productId, 
-                           @RequestParam String size,
+    public String updateCart(@RequestParam(required = false) Integer index,
+                           @RequestParam(required = false) Long productId, 
+                           @RequestParam(required = false) String size,
                            @RequestParam Integer quantity, 
                            HttpSession session, 
                            RedirectAttributes redirectAttributes) {
         List<CartItem> cart = getCartFromSession(session);
-        Product product = productService.getProductById(productId);
-        int availableStock = inventoryService.getCalculatedStock(product);
+        
+        // Ưu tiên cập nhật theo index để chính xác tuyệt đối
+        if (index != null && index >= 0 && index < cart.size()) {
+            CartItem item = cart.get(index);
+            Product product = productService.getProductById(item.getProductId());
+            int availableStock = inventoryService.getCalculatedStock(product);
 
-        for (CartItem item : cart) {
-            if (item.getProductId().equals(productId) && item.getSize().equals(size)) {
-                if (quantity <= 0) {
-                    cart.remove(item);
-                    redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng.");
+            if (quantity <= 0) {
+                cart.remove(item);
+                redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng.");
+            } else {
+                if (quantity > availableStock) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Số lượng yêu cầu vượt quá tồn kho hiện có.");
+                    item.setQuantity(availableStock);
                 } else {
-                    if (quantity > availableStock) {
-                        redirectAttributes.addFlashAttribute("errorMessage", "Số lượng yêu cầu vượt quá tồn kho hiện có (" + availableStock + ").");
-                        item.setQuantity(availableStock);
-                    } else {
-                        item.setQuantity(quantity);
-                        redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật giỏ hàng.");
-                    }
+                    item.setQuantity(quantity);
+                    redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật giỏ hàng.");
                 }
-                break;
+            }
+        } else if (productId != null && size != null) {
+            // Fallback logic cũ nếu không có index
+            Product product = productService.getProductById(productId);
+            int availableStock = inventoryService.getCalculatedStock(product);
+            for (CartItem item : cart) {
+                if (item.getProductId().equals(productId) && item.getSize().equals(size)) {
+                    if (quantity <= 0) {
+                        cart.remove(item);
+                    } else {
+                        item.setQuantity(Math.min(quantity, availableStock));
+                    }
+                    break;
+                }
             }
         }
         return "redirect:/cart";

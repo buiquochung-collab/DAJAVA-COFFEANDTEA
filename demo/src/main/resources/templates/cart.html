@@ -49,8 +49,7 @@
                                         <td>
                                             <div class="d-flex align-items-center" style="width: 100px;">
                                                 <form th:action="@{/cart/update}" method="post">
-                                                    <input type="hidden" name="productId" th:value="${item.productId}">
-                                                    <input type="hidden" name="size" th:value="${item.size}">
+                                                    <input type="hidden" name="index" th:value="${iter.index}">
                                                     <input type="number" name="quantity" class="form-control form-control-sm text-center border-success" 
                                                            th:value="${item.quantity}" min="1" onchange="this.form.submit()">
                                                 </form>
