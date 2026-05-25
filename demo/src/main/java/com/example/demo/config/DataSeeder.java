@@ -38,32 +38,10 @@ public class DataSeeder implements CommandLineRunner {
     @org.springframework.transaction.annotation.Transactional
     @Override
     public void run(String... args) throws Exception {
-        entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
-        systemSettingRepository.deleteAll();
-        inventoryLogRepository.deleteAll();
-        userVoucherRepository.deleteAll();
-        // ... rest of deletes ...
-        voucherRepository.deleteAll();
-        recipeRepository.deleteAll();
-        orderDetailRepository.deleteAll();
-        orderRepository.deleteAll();
-        notificationRepository.deleteAll();
-        pointHistoryRepository.deleteAll();
-        productRepository.deleteAll();
-        categoryRepository.deleteAll();
-        ingredientRepository.deleteAll();
-        userRepository.deleteAll();
-
-        entityManager.createNativeQuery("ALTER TABLE orders AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE order_details AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE products AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE categories AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE ingredients AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE users AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE vouchers AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE system_settings AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE inventory_logs AUTO_INCREMENT = 1").executeUpdate();
-        entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
+        if (userRepository.count() > 0) {
+            // Nếu đã có dữ liệu (đã seed rồi) thì bỏ qua không seed lại nữa để tránh mất dữ liệu trên web thật
+            return;
+        }
 
         seedSettings();
         seedUsers();
