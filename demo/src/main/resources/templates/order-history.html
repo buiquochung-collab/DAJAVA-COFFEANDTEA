@@ -234,14 +234,14 @@
                                             </div>
                                         </td>
                                         <td class="text-center" th:text="${item.quantity}"></td>
-                                        <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
-                                        <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                                        <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <td colspan="3" class="text-end pt-4">Tổng cộng:</td>
-                                        <td class="text-end pt-4 fw-bold h5 text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+                                        <td class="text-end pt-4 fw-bold h5 text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -292,7 +292,7 @@
             </div>
             <div class="col-md-4 text-end">
                 <p class="mb-1 small text-muted">Tổng cộng</p>
-                <h4 class="fw-bold text-success mb-3" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></h4>
+                <h4 class="fw-bold text-success mb-3" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></h4>
                 
                 <div class="d-flex gap-2 justify-content-end">
                     <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" 

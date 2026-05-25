@@ -84,45 +84,44 @@ public class DataSeeder implements CommandLineRunner {
     private Map<String, Ingredient> seedIngredients() {
         List<Ingredient> ings = Arrays.asList(
             // TRÀ
-            Ingredient.builder().name("Trà Lài (20 gói)").unit("bịch").stockQuantity(120000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Trà Sen (20 gói)").unit("bịch").stockQuantity(120000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Trà Ô long (20 gói)").unit("bịch").stockQuantity(140000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Trà Phúc Long (20 gói)").unit("bịch").stockQuantity(140000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Trà Quế hoa (20 gói)").unit("bịch").stockQuantity(145000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Trà Thảo mộc (20 gói)").unit("bịch").stockQuantity(150000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Hồng trà (200g)").unit("bịch").stockQuantity(95000.0).costPerUnit(BigDecimal.valueOf(100)).build(),
-            Ingredient.builder().name("Trà Bá tước (200g)").unit("bịch").stockQuantity(110000.0).costPerUnit(BigDecimal.valueOf(100)).build(),
-            
+            Ingredient.builder().name("Trà Lài (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(50000)).build(),
+            Ingredient.builder().name("Trà Sen (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(50000)).build(),
+            Ingredient.builder().name("Trà Ô long (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(60000)).build(),
+            Ingredient.builder().name("Trà Phúc Long (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(70000)).build(),
+            Ingredient.builder().name("Trà Quế hoa (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(60000)).build(),
+            Ingredient.builder().name("Trà Thảo mộc (20 gói)").unit("bịch").stockQuantity(120.0).costPerUnit(BigDecimal.valueOf(65000)).build(),
+            Ingredient.builder().name("Hồng trà (200g)").unit("bịch").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(45000)).build(),
+            Ingredient.builder().name("Trà Bá tước (200g)").unit("bịch").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(55000)).build(),
+
             // CÀ PHÊ & BỘT & SYRUP
-            Ingredient.builder().name("Cà phê hạt (500g)").unit("bịch").stockQuantity(185000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Bột kem béo (kg)").unit("kg").stockQuantity(85000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Bột Matcha (kg)").unit("kg").stockQuantity(450000.0).costPerUnit(BigDecimal.valueOf(10)).build(),
-            Ingredient.builder().name("Bột Chocolate (kg)").unit("kg").stockQuantity(180000.0).costPerUnit(BigDecimal.valueOf(10)).build(),
-            Ingredient.builder().name("Syrup Vải (Chai)").unit("chai").stockQuantity(165000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Syrup Đào (Chai)").unit("chai").stockQuantity(165000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Syrup Thơm (Chai)").unit("chai").stockQuantity(165000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Syrup Ổi (Chai)").unit("chai").stockQuantity(175000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Sunup Ổi (Chai)").unit("chai").stockQuantity(210000.0).costPerUnit(BigDecimal.valueOf(10)).build(),
-            Ingredient.builder().name("Syrup Chocolate (Chai)").unit("chai").stockQuantity(195000.0).costPerUnit(BigDecimal.valueOf(10)).build(),
-            
+            Ingredient.builder().name("Cà phê hạt (500g)").unit("bịch").stockQuantity(150.0).costPerUnit(BigDecimal.valueOf(110000)).build(),
+            Ingredient.builder().name("Bột kem béo (kg)").unit("kg").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(85000)).build(),
+            Ingredient.builder().name("Bột Matcha (kg)").unit("kg").stockQuantity(20.0).costPerUnit(BigDecimal.valueOf(650000)).build(),
+            Ingredient.builder().name("Bột Chocolate (kg)").unit("kg").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(180000)).build(),
+            Ingredient.builder().name("Syrup Vải (Chai)").unit("chai").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(125000)).build(),
+            Ingredient.builder().name("Syrup Đào (Chai)").unit("chai").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(125000)).build(),
+            Ingredient.builder().name("Syrup Thơm (Chai)").unit("chai").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(125000)).build(),
+            Ingredient.builder().name("Syrup Ổi (Chai)").unit("chai").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(125000)).build(),
+            Ingredient.builder().name("Sunup Ổi (Chai)").unit("chai").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(210000)).build(),
+            Ingredient.builder().name("Syrup Chocolate (Chai)").unit("chai").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(195000)).build(),
+
             // TƯƠI & ĐỒ HỘP
-            Ingredient.builder().name("Đác thơm (1kg)").unit("bịch").stockQuantity(95000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Trái thơm (Quả)").unit("trái").stockQuantity(15000.0).costPerUnit(BigDecimal.valueOf(30)).build(),
-            Ingredient.builder().name("Chanh tươi (kg)").unit("kg").stockQuantity(35000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Cam tươi (kg)").unit("kg").stockQuantity(45000.0).costPerUnit(BigDecimal.valueOf(20)).build(),
-            Ingredient.builder().name("Trái xoài (Quả)").unit("trái").stockQuantity(20000.0).costPerUnit(BigDecimal.valueOf(30)).build(),
-            Ingredient.builder().name("Đào ngâm (Hộp)").unit("hộp").stockQuantity(65000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Vải ngâm (Hộp)").unit("hộp").stockQuantity(55000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Nhãn ngâm (Hộp)").unit("hộp").stockQuantity(55000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            
+            Ingredient.builder().name("Đác thơm (1kg)").unit("bịch").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(95000)).build(),
+            Ingredient.builder().name("Trái thơm (Quả)").unit("trái").stockQuantity(30.0).costPerUnit(BigDecimal.valueOf(15000)).build(),
+            Ingredient.builder().name("Chanh tươi (kg)").unit("kg").stockQuantity(20.0).costPerUnit(BigDecimal.valueOf(35000)).build(),
+            Ingredient.builder().name("Cam tươi (kg)").unit("kg").stockQuantity(20.0).costPerUnit(BigDecimal.valueOf(45000)).build(),
+            Ingredient.builder().name("Trái xoài (Quả)").unit("trái").stockQuantity(30.0).costPerUnit(BigDecimal.valueOf(20000)).build(),
+            Ingredient.builder().name("Đào ngâm (Hộp)").unit("hộp").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(45000)).build(),
+            Ingredient.builder().name("Vải ngâm (Hộp)").unit("hộp").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(48000)).build(),
+            Ingredient.builder().name("Nhãn ngâm (Hộp)").unit("hộp").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(48000)).build(),
+
             // SỮA & KHÁC
-            Ingredient.builder().name("Sữa đặc (Lon)").unit("hộp").stockQuantity(18000.0).costPerUnit(BigDecimal.valueOf(100)).build(),
-            Ingredient.builder().name("Sữa tươi (Lít)").unit("lít").stockQuantity(32000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Đường cát (kg)").unit("kg").stockQuantity(22000.0).costPerUnit(BigDecimal.valueOf(100)).build(),
-            Ingredient.builder().name("Bánh Oreo (12 cái)").unit("thanh").stockQuantity(15000.0).costPerUnit(BigDecimal.valueOf(50)).build(),
-            Ingredient.builder().name("Sữa chua (200g)").unit("hộp").stockQuantity(8000.0).costPerUnit(BigDecimal.valueOf(50)).build()
-        );
-        ingredientRepository.saveAll(ings);
+            Ingredient.builder().name("Sữa đặc (Lon)").unit("hộp").stockQuantity(200.0).costPerUnit(BigDecimal.valueOf(18000)).build(),
+            Ingredient.builder().name("Sữa tươi (Lít)").unit("lít").stockQuantity(100.0).costPerUnit(BigDecimal.valueOf(32000)).build(),
+            Ingredient.builder().name("Đường cát (kg)").unit("kg").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(22000)).build(),
+            Ingredient.builder().name("Bánh Oreo (12 cái)").unit("thanh").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(15000)).build(),
+            Ingredient.builder().name("Sữa chua (200g)").unit("hộp").stockQuantity(50.0).costPerUnit(BigDecimal.valueOf(8000)).build()
+        );        ingredientRepository.saveAll(ings);
         return ings.stream().collect(Collectors.toMap(Ingredient::getName, i -> i));
     }
 
@@ -374,4 +373,3 @@ public class DataSeeder implements CommandLineRunner {
         return "/uploads/products/" + slug + ".png";
     }
 }
-

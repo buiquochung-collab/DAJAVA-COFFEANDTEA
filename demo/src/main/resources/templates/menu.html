@@ -68,19 +68,19 @@
                             <div class="price-container">
                                 <div class="price-toggle" th:if="${product.priceM != null or product.priceL != null}">
                                     <span class="size-btn active" th:if="${product.priceM != null}" data-size="M"
-                                          th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                          th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'POINT', 0, 'COMMA') + 'đ'}"
                                           onclick="updatePrice(this)">M</span>
                                     <span class="size-btn" th:if="${product.priceL != null}" data-size="L"
                                           th:classappend="${product.priceM == null ? 'active' : ''}"
-                                          th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                          th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'POINT', 0, 'COMMA') + 'đ'}"
                                           onclick="updatePrice(this)">L</span>
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-muted text-decoration-line-through small me-2" 
                                           th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}"
-                                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span>
+                                          th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA') + 'đ'}"></span>
                                     <span class="price text-success fw-bold" 
-                                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span>
+                                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
                                 </div>
                             </div>
 

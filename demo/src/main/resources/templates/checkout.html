@@ -145,31 +145,31 @@
                     <div class="checkout-items mb-4" style="max-height: 200px; overflow-y: auto;">
                         <div th:each="item : ${cartItems}" class="d-flex justify-content-between mb-2 small">
                             <span th:text="${item.productName} + ' x' + ${item.quantity}"></span>
-                            <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
                         </div>
                     </div>
 
                     <div class="summary-details bg-light p-3 rounded-4 mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Tạm tính:</span>
-                            <span class="small" th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <span class="small" th:text="${#numbers.formatDecimal(subtotal, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Phí giao hàng:</span>
-                            <span class="small text-success" th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT') + ' đ'}">15,000 đ</span>
+                            <span class="small text-success" th:text="${#numbers.formatDecimal(shippingFee, 0, 'POINT', 0, 'COMMA') + ' đ'}">15,000 đ</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">VAT (10%):</span>
-                            <span class="small" th:text="${#numbers.formatDecimal(vatAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <span class="small" th:text="${#numbers.formatDecimal(vatAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
                         </div>
                         <div class="d-flex justify-content-between mb-2 text-danger fw-bold" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
                             <span class="small">Giảm giá:</span>
-                            <span class="small" th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+                            <span class="small" th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="mb-0 fw-bold">TỔNG CỘNG</h4>
-                            <h4 class="mb-0 text-success fw-bold" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + ' đ'}"></h4>
+                            <h4 class="mb-0 text-success fw-bold" th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + ' đ'}"></h4>
                         </div>
                     </div>
 

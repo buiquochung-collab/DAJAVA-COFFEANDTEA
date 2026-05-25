@@ -38,7 +38,7 @@
                             <div class="fw-bold" th:text="${order.user.fullName ?: order.user.username}">Customer</div>
                             <div class="small text-muted" th:text="${order.user.phone ?: '-'}">090xxxxxxx</div>
                         </td>
-                        <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                        <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
                         <td>
                             <span class="small badge bg-light text-dark border" th:text="${order.paymentMethod == 'BANK' ? 'Chuyển khoản' : 'Tiền mặt'}">COD</span>
                             <div class="small text-muted mt-1" th:text="${order.deliveryMethod == 'STORE' ? 'Tại quầy' : 'Giao tận nơi'}">Giao hàng</div>
@@ -141,14 +141,14 @@
                                 <div class="small text-muted" th:text="'Size ' + (${item.size ?: 'M'}) + (${item.note != null ? ' | ' + item.note : ''})"></div>
                             </td>
                             <td class="text-center" th:text="${item.quantity}"></td>
-                            <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
-                            <td class="text-end pe-4 fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + 'đ'"></td>
+                            <td class="text-end pe-4 fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'COMMA')} + 'đ'"></td>
                         </tr>
                     </tbody>
                     <tfoot class="table-light">
                         <tr>
                             <td colspan="3" class="text-end fw-bold ps-4">Tổng cộng đơn hàng:</td>
-                            <td class="text-end pe-4 fw-bold text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                            <td class="text-end pe-4 fw-bold text-success" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'"></td>
                         </tr>
                     </tfoot>
                 </table>

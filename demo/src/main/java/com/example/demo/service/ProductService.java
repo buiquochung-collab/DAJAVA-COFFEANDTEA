@@ -79,7 +79,7 @@ public class ProductService {
         return bestSellers;
     }
 
-    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 0 * * ?") // Chạy vào 0h mỗi ngày
+    // @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 0 * * ?") // Chạy vào 0h mỗi ngày
     @org.springframework.transaction.annotation.Transactional
     public void updateBestSellers() {
         java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);

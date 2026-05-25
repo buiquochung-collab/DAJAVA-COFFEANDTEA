@@ -31,12 +31,12 @@
                 <div class="mb-3">
                     <span class="text-muted text-decoration-line-through h4 me-2" 
                           th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}"
-                          th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span>
+                          th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'COMMA') + 'đ'}"></span>
                     <span class="h2 fw-bold text-success mb-0" id="displayPrice" 
-                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span>
+                          th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span>
                     <span th:if="${product.promotion != null and product.promotion.isCurrentlyActive()}" 
                           class="badge bg-danger ms-2 rounded-pill" 
-                          th:text="'-' + (product.promotion.discountType.name() == 'PERCENT' ? product.promotion.discountValue + '%' : #numbers.formatDecimal(product.promotion.discountValue, 0, 'COMMA', 0, 'POINT') + 'đ')"></span>
+                          th:text="'-' + (product.promotion.discountType.name() == 'PERCENT' ? product.promotion.discountValue + '%' : #numbers.formatDecimal(product.promotion.discountValue, 0, 'POINT', 0, 'COMMA') + 'đ')"></span>
                 </div>
 
                 <div class="mb-4">
@@ -57,17 +57,17 @@
                             <!-- Hiển thị size M cho tất cả -->
                             <div class="form-check p-0">
                                 <input class="form-check-input d-none" type="radio" name="size" id="sizeM" value="M" checked 
-                                       th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}" onchange="updatePriceDisplay(this)">
+                                       th:data-price="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'POINT', 0, 'COMMA') + 'đ'}" onchange="updatePriceDisplay(this)">
                                 <label class="size-circle" for="sizeM">M</label>
-                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
+                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'POINT', 0, 'COMMA') + 'đ'}"></div>
                             </div>
                             
                             <!-- Chỉ hiện size L nếu không phải Đá xay và có giá L -->
                             <div class="form-check p-0" th:if="${!#strings.contains(product.category.name, 'Đá xay') and product.priceL != null}">
                                 <input class="form-check-input d-none" type="radio" name="size" id="sizeL" value="L" 
-                                       th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}" onchange="updatePriceDisplay(this)">
+                                       th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'POINT', 0, 'COMMA') + 'đ'}" onchange="updatePriceDisplay(this)">
                                 <label class="size-circle" for="sizeL">L</label>
-                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
+                                <div class="text-center mt-1 small" th:text="${#numbers.formatDecimal(product.priceL, 0, 'POINT', 0, 'COMMA') + 'đ'}"></div>
                             </div>
                         </div>
                     </div>

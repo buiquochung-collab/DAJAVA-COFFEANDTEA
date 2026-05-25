@@ -151,7 +151,7 @@
                             <div class="voucher-item-box rounded-4 shadow-sm h-100">
                                 <div class="voucher-header">
                                     <div class="small opacity-75 text-uppercase fw-bold mb-1">Giảm trực tiếp</div>
-                                    <h3 class="fw-bold mb-0" th:text="${uv.voucher.discountType == 'PERCENT' ? uv.voucher.discountAmount + '%' : #numbers.formatDecimal(uv.voucher.discountAmount/1000, 0, 'COMMA', 0, 'POINT') + 'K'}"></h3>
+                                    <h3 class="fw-bold mb-0" th:text="${uv.voucher.discountType == 'PERCENT' ? uv.voucher.discountAmount + '%' : #numbers.formatDecimal(uv.voucher.discountAmount/1000, 0, 'POINT', 0, 'COMMA') + 'K'}"></h3>
                                 </div>
                                 
                                 <div class="qr-section">

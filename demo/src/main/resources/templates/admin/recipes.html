@@ -51,10 +51,10 @@
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-dark text-white">
                 <div class="card-body p-4 text-center">
                     <div class="small opacity-50 text-uppercase">Tổng giá vốn (Cost)</div>
-                    <h2 class="fw-bold my-2" th:text="${#numbers.formatDecimal(totalCost, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</h2>
+                    <h2 class="fw-bold my-2" th:text="${#numbers.formatDecimal(totalCost, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</h2>
                     <hr class="opacity-10 my-3">
                     <div class="small opacity-50 text-uppercase">Giá bán niêm yết (M)</div>
-                    <h4 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(product.priceM, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</h4>
+                    <h4 class="fw-bold mb-3" th:text="${#numbers.formatDecimal(product.priceM, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</h4>
                     
                     <div class="p-2 rounded-3 bg-success bg-opacity-25 border border-success border-opacity-50" th:if="${product.priceM > 0}">
                         <span class="small opacity-75">Tỷ suất lợi nhuận gộp:</span>
@@ -81,9 +81,9 @@
                         <tbody>
                             <tr th:each="r : ${recipes}">
                                 <td class="ps-4 fw-bold text-dark" th:text="${r.ingredient.name}">Ingredient</td>
-                                <td th:text="${#numbers.formatDecimal(r.quantityRequired, 0, 'COMMA', 3, 'POINT')} + ' ' + ${r.ingredient.unit}">0.05</td>
-                                <td class="small text-muted" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
-                                <td class="text-success fw-bold" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit * r.quantityRequired, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                                <td th:text="${#numbers.formatDecimal(r.quantityRequired, 0, 'POINT', 3, 'COMMA')} + ' ' + ${r.ingredient.unit}">0.05</td>
+                                <td class="small text-muted" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
+                                <td class="text-success fw-bold" th:text="${#numbers.formatDecimal(r.ingredient.costPerUnit * r.quantityRequired, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
                                 <td class="text-end pe-4">
                                     <a th:href="@{'/admin/recipes/delete/' + ${r.id}}" class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" onclick="return confirm('Loại bỏ nguyên liệu này khỏi công thức?')">
                                         <i class="fas fa-trash"></i>

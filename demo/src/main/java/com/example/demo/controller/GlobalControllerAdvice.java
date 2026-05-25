@@ -31,9 +31,15 @@ public class GlobalControllerAdvice {
     public void addAttributes(Model model, Authentication authentication, jakarta.servlet.http.HttpSession session) {
         model.addAttribute("categories", categoryService.getAllCategories());
         
-        // Add cart item count
-        java.util.List<?> cart = (java.util.List<?>) session.getAttribute("cart_items");
-        model.addAttribute("cartItemCount", cart != null ? cart.size() : 0);
+        // Add cart item count (sum of all quantities)
+        java.util.List<com.example.demo.model.CartItem> cart = (java.util.List<com.example.demo.model.CartItem>) session.getAttribute("cart_items");
+        int count = 0;
+        if (cart != null) {
+            for (com.example.demo.model.CartItem item : cart) {
+                count += item.getQuantity();
+            }
+        }
+        model.addAttribute("cartItemCount", count);
         
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
             User user = null;

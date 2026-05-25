@@ -40,7 +40,10 @@
                             <div class="d-flex align-items-center">
                                 <img th:src="${prod.imageUrl}" class="rounded-3 me-3" width="50" height="50" style="object-fit: cover;">
                                 <div>
-                                    <div class="fw-bold text-dark" th:text="${prod.name}">Product Name</div>
+                                    <div class="fw-bold text-dark">
+                                        <span th:text="${prod.name}">Product Name</span>
+                                        <span th:if="${prod.bestSeller}" class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;">BESTSELLER</span>
+                                    </div>
                                     <div th:if="${prod.promotion != null}" class="badge bg-danger-subtle text-danger" style="font-size: 0.6rem;">
                                         KM: <span th:text="${prod.promotion.name}"></span>
                                     </div>
@@ -51,8 +54,8 @@
                             <span class="badge bg-light text-dark rounded-pill border" th:text="${prod.category.name}">Category</span>
                         </td>
                         <td>
-                            <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(prod.priceM, 0, 'COMMA', 0, 'POINT')} + 'đ'"></div>
-                            <div class="small text-muted" th:if="${prod.priceL != null}" th:text="${#numbers.formatDecimal(prod.priceL, 0, 'COMMA', 0, 'POINT')} + 'đ (Size L)'"></div>
+                            <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(prod.priceM, 0, 'POINT', 0, 'COMMA')} + 'đ'"></div>
+                            <div class="small text-muted" th:if="${prod.priceL != null}" th:text="${#numbers.formatDecimal(prod.priceL, 0, 'POINT', 0, 'COMMA')} + 'đ (Size L)'"></div>
                         </td>
                         <td>
                             <span th:if="${prod.isRecipeBased}" class="badge bg-info-subtle text-info rounded-pill">🧪 Công thức</span>
@@ -71,7 +74,7 @@
                                 <i class="fas fa-flask"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-primary rounded-circle ms-1 shadow-sm" 
-                                    th:attr="data-id=${prod.id}, data-name=${prod.name}, data-pricem=${prod.priceM}, data-pricel=${prod.priceL}, data-catid=${prod.category != null ? prod.category.id : ''}, data-imageurl=${prod.imageUrl}, data-desc=${prod.description}, data-stock=${prod.stock != null ? prod.stock : 0}, data-isrecipe=${prod.isRecipeBased}, data-promoid=${prod.promotion != null ? prod.promotion.id : ''}"
+                                    th:attr="data-id=${prod.id}, data-name=${prod.name}, data-pricem=${prod.priceM}, data-pricel=${prod.priceL}, data-catid=${prod.category != null ? prod.category.id : ''}, data-imageurl=${prod.imageUrl}, data-desc=${prod.description}, data-stock=${prod.stock != null ? prod.stock : 0}, data-isrecipe=${prod.isRecipeBased}, data-promoid=${prod.promotion != null ? prod.promotion.id : ''}, data-bestseller=${prod.bestSeller}"
                                     onclick="editProd(this)"
                                     data-bs-toggle="modal" data-bs-target="#productModal" title="Sửa">
                                 <i class="fas fa-edit"></i>
@@ -139,6 +142,13 @@
                                 <label class="form-label small fw-bold text-danger">Tồn kho ban đầu</label>
                                 <input type="number" name="stock" id="prod-stock" class="form-control rounded-pill border-danger" value="0">
                             </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Trạng thái Đặc biệt</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="bestSeller" id="prod-bestSeller">
+                                    <label class="form-check-label small fw-bold text-primary" for="prod-bestSeller">🌟 Bestseller</label>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Mô tả sản phẩm</label>
                                 <textarea name="description" id="prod-desc" class="form-control rounded-4" rows="3"></textarea>
@@ -172,6 +182,7 @@
             var stock = btn.getAttribute('data-stock');
             var isRecipe = btn.getAttribute('data-isrecipe');
             var promoId = btn.getAttribute('data-promoid');
+            var bestSeller = btn.getAttribute('data-bestseller');
 
             document.getElementById('modalTitle').innerText = 'Chỉnh sửa Sản phẩm';
             document.getElementById('prod-id').value = id;
@@ -184,6 +195,7 @@
             document.getElementById('prod-stock').value = stock;
             document.getElementById('prod-isRecipe').value = isRecipe === 'true' ? 'true' : 'false';
             document.getElementById('prod-promoId').value = promoId === 'null' ? '' : promoId;
+            document.getElementById('prod-bestSeller').checked = bestSeller === 'true';
             toggleStockField();
         }
 
@@ -197,6 +209,7 @@
             document.getElementById('prod-stock').value = '0';
             document.getElementById('prod-isRecipe').value = 'true';
             document.getElementById('prod-promoId').value = '';
+            document.getElementById('prod-bestSeller').checked = false;
             toggleStockField();
         }
     </script>

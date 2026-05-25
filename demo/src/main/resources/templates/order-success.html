@@ -16,7 +16,7 @@
             
             <div class="order-info bg-light p-4 rounded-4 my-4 mx-auto" style="max-width: 500px;">
                 <p class="mb-2">Mã đơn hàng: <strong class="text-success" th:text="'#' + ${order.id}">#12345</strong></p>
-                <p class="mb-2">Tổng thanh toán: <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></strong></p>
+                <p class="mb-2">Tổng thanh toán: <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></strong></p>
                 <p class="mb-0">Phương thức: <strong th:text="${order.paymentMethod == 'COD' ? 'Tiền mặt' : (order.paymentMethod == 'MOMO' ? 'Ví MoMo' : 'Chuyển khoản ngân hàng')}"></strong></p>
             </div>
 

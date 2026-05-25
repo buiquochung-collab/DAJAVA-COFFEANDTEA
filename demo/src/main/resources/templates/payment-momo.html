@@ -25,7 +25,7 @@
                 
                 <div class="payment-details text-start bg-light p-4 rounded-4 mb-4">
                     <p class="mb-2">Mã đơn hàng: <strong class="text-danger" th:text="'#' + ${order.id}"></strong></p>
-                    <p class="mb-2">Số tiền: <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></strong></p>
+                    <p class="mb-2">Số tiền: <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></strong></p>
                     <hr>
                     <p class="mb-1 small"><strong>Chủ tài khoản:</strong> BUI QUOC HUNG</p>
                     <p class="mb-1 small"><strong>Số điện thoại:</strong> 0942367010</p>

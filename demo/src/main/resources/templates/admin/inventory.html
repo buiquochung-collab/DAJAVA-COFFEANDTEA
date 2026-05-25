@@ -7,15 +7,15 @@
 <body>
 <div layout:fragment="admin-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Quản lý kho nguyên liệu</h2>
+        <h2 class="fw-bold mb-0">Hệ thống Quản lý Kho & Cost</h2>
         <div class="d-flex gap-3">
             <div class="card card-custom px-3 py-2 bg-white shadow-sm border-0 rounded-4">
-                <div class="small text-muted">Tổng giá trị tồn kho</div>
-                <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(totalValue, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</div>
+                <div class="small text-muted">Tổng giá trị kho</div>
+                <div class="fw-bold text-success" th:text="${#numbers.formatDecimal(totalValue, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</div>
             </div>
             <div class="card card-custom px-3 py-2 bg-white shadow-sm border-0 rounded-4">
-                <div class="small text-muted">Mặt hàng sắp hết</div>
-                <div class="fw-bold text-danger" th:text="${lowStockCount} + ' món'">0</div>
+                <div class="small text-muted">Nguyên liệu sắp hết</div>
+                <div class="fw-bold text-danger" th:text="${lowStockCount} + ' loại'">0</div>
             </div>
         </div>
     </div>
@@ -28,10 +28,10 @@
     <!-- Inventory Tabs -->
     <ul class="nav nav-pills mb-4 p-1 bg-white rounded-pill shadow-sm d-inline-flex" id="inventoryTabs" role="tablist">
         <li class="nav-item">
-            <button class="nav-link active rounded-pill px-4" id="stock-tab" data-bs-toggle="pill" data-bs-target="#stockContent">Tồn kho hiện tại</button>
+            <button class="nav-link active rounded-pill px-4" id="stock-tab" data-bs-toggle="pill" data-bs-target="#stockContent">Báo cáo Tồn kho</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link rounded-pill px-4" id="logs-tab" data-bs-toggle="pill" data-bs-target="#logsContent">Nhật ký nhập hàng</button>
+            <button class="nav-link rounded-pill px-4" id="logs-tab" data-bs-toggle="pill" data-bs-target="#logsContent">Nhật ký Nhập kho</button>
         </li>
     </ul>
     
@@ -44,9 +44,10 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-4">Nguyên liệu</th>
-                                <th>Tồn kho khả dụng</th>
-                                <th>Đơn vị tính</th>
+                                <th>Số lượng tồn</th>
+                                <th>ĐVT</th>
                                 <th>Giá vốn TB</th>
+                                <th>Giá trị kho</th>
                                 <th>Tình trạng</th>
                                 <th class="text-end pe-4">Thao tác</th>
                             </tr>
@@ -55,14 +56,15 @@
                             <tr th:each="ing : ${ingredients}">
                                 <td class="ps-4">
                                     <div class="fw-bold text-dark" th:text="${ing.name}">Ingredient Name</div>
-                                    <small class="text-muted" th:text="'Mã: #' + ${ing.id}"></small>
+                                    <small class="text-muted" th:text="'Mã NL: #' + ${ing.id}"></small>
                                 </td>
                                 <td>
                                     <span class="fw-bold" th:classappend="${ing.stockQuantity <= 5 ? 'text-danger' : 'text-dark'}" 
-                                          th:text="${#numbers.formatDecimal(ing.stockQuantity, 0, 'COMMA', 2, 'POINT')}">10.00</span>
+                                          th:text="${#numbers.formatDecimal(ing.stockQuantity, 0, 'POINT', 2, 'COMMA')}">10.00</span>
                                 </td>
-                                <td class="small" th:text="${ing.unit}">ml</td>
-                                <td th:text="${#numbers.formatDecimal(ing.costPerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'">100đ</td>
+                                <td class="small text-muted" th:text="${ing.unit}">ml</td>
+                                <td th:text="${#numbers.formatDecimal(ing.costPerUnit, 0, 'POINT', 0, 'COMMA')} + 'đ'">100đ</td>
+                                <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(ing.stockQuantity * ing.costPerUnit.doubleValue(), 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
                                 <td>
                                     <span class="badge rounded-pill" 
                                           th:classappend="${ing.stockQuantity > 20 ? 'bg-success-subtle text-success' : (ing.stockQuantity > 5 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger')}"
@@ -72,7 +74,7 @@
                                     <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" 
                                             th:attr="data-id=${ing.id}, data-name=${ing.name}, data-cost=${ing.costPerUnit}"
                                             onclick="openRestockModal(this)">
-                                        <i class="fas fa-plus me-1"></i>Nhập hàng
+                                        <i class="fas fa-plus me-1"></i>Nhập kho
                                     </button>
                                 </td>
                             </tr>
@@ -94,12 +96,12 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th class="ps-4">Thời gian thực hiện</th>
+                                <th class="ps-4">Thời gian</th>
                                 <th>Nguyên liệu</th>
                                 <th>Số lượng</th>
                                 <th>Đơn giá nhập</th>
                                 <th>Nhà cung cấp</th>
-                                <th>Người nhập</th>
+                                <th>Người thực hiện</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,7 +109,7 @@
                                 <td class="ps-4 small" th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                                 <td class="fw-bold" th:text="${log.ingredient.name}"></td>
                                 <td class="text-success fw-bold" th:text="'+ ' + ${log.quantity} + ' ' + ${log.ingredient.unit}"></td>
-                                <td th:text="${#numbers.formatDecimal(log.pricePerUnit, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                <td th:text="${#numbers.formatDecimal(log.pricePerUnit, 0, 'POINT', 0, 'COMMA')} + 'đ'"></td>
                                 <td class="small" th:text="${log.supplier}"></td>
                                 <td class="small fw-bold" th:text="${log.performer.username}"></td>
                             </tr>

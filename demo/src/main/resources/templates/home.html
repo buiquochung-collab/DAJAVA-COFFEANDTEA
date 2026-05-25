@@ -2,21 +2,22 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Trang chủ</title>
+    <title>Trang chủ | Tea & Coffee</title>
     <!-- Thêm font chữ đẹp -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', sans-serif; }
-        .section-title { letter-spacing: 2px; color: var(--pl-green); }
+        body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; }
+        .section-title { letter-spacing: 2px; color: var(--pl-green); font-family: 'Playfair Display', serif; }
         .product-card { 
             border: none; 
-            transition: all 0.3s; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
             background: #fff; 
-            border-radius: 15px !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(0,0,0,0.05);
         }
         .product-card:hover { 
-            transform: translateY(-10px); 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; 
+            transform: translateY(-12px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important; 
         }
         .price-toggle {
             display: flex;
@@ -25,22 +26,55 @@
             margin-bottom: 10px;
         }
         .size-btn {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 1px solid #ddd;
+            border: 1px solid #eee;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.75rem;
             cursor: pointer;
             transition: 0.2s;
-            background: #f8f9fa;
+            background: #fff;
+            font-weight: 600;
         }
         .size-btn.active {
             background: var(--pl-green);
             color: white;
             border-color: var(--pl-green);
+        }
+        
+        /* Banner fix */
+        .banner-img {
+            height: 450px;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        @media (max-width: 768px) {
+            .banner-img { height: 250px; }
+        }
+        
+        /* Indicators fix */
+        .carousel-indicators {
+            bottom: 20px;
+        }
+        .carousel-indicators [data-bs-target] {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 5px;
+            background-color: rgba(255,255,255,0.5);
+            border: 2px solid transparent;
+        }
+        .carousel-indicators .active {
+            background-color: #fff;
+            transform: scale(1.2);
+        }
+
+        /* Bestseller limit */
+        .bestseller-item.hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -49,6 +83,12 @@
     <!-- Banner Carousel - 4 Banners -->
     <div class="container my-4">
         <div id="homeCarousel" class="carousel slide overflow-hidden shadow-sm" data-bs-ride="carousel" style="border-radius: 20px;">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="3"></button>
+            </div>
             <div class="carousel-inner">
                 <div class="carousel-item active" data-bs-interval="3000">
                     <img src="/uploads/banners/banner1.png" class="d-block w-100 banner-img" alt="Banner 1">
@@ -72,28 +112,28 @@
         </div>
     </div>
 
-    <!-- Best Sellers Section ONLY -->
+    <!-- Best Sellers Section -->
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h2 class="fw-bold section-title text-uppercase">Best Sellers</h2>
-            <div class="mx-auto mt-2" style="width: 80px; height: 4px; background-color: var(--pl-green); border-radius: 2px;"></div>
-            <p class="text-muted mt-3">Những hương vị được yêu thích nhất trong tháng qua</p>
+            <h2 class="fw-bold section-title text-uppercase display-5">Best Sellers</h2>
+            <div class="mx-auto mt-2" style="width: 60px; height: 3px; background-color: var(--pl-green); border-radius: 2px;"></div>
+            <p class="text-muted mt-3">Khám phá những hương vị làm nên tên tuổi của Tea & Coffee</p>
         </div>
 
-        <div class="row g-4 justify-content-center">
+        <div class="row g-4 justify-content-center" id="bestseller-container">
             <!-- Nếu không có bestseller -->
             <div th:if="${bestSellers == null or bestSellers.empty}" class="col-12 text-center py-5">
                 <div class="opacity-50">
-                    <i class="fas fa-mug-hot fa-3x mb-3"></i>
-                    <p>Hiện chưa có sản phẩm nào đạt danh hiệu Bestseller tháng này.</p>
+                    <i class="fas fa-mug-hot fa-3x mb-3 text-muted"></i>
+                    <p>Hiện chưa có sản phẩm nào đạt danh hiệu Bestseller.</p>
                 </div>
             </div>
 
             <!-- Danh sách bestseller -->
-            <div class="col-6 col-md-4 col-lg-3" th:each="product : ${bestSellers}">
+            <div class="col-6 col-md-4 col-lg-3 bestseller-item" th:each="product, iter : ${bestSellers}" th:classappend="${iter.index >= 3 ? 'hidden' : ''}">
                 <div class="product-card text-center h-100 d-flex flex-column p-4 shadow-sm">
                     <a th:href="@{'/product/' + ${product.id}}" class="text-decoration-none flex-grow-1">
-                        <img th:src="${product.imageUrl}" class="product-img mb-3 w-100" alt="Product Image" style="max-height: 200px; object-fit: contain;">
+                        <img th:src="${product.imageUrl}" class="product-img mb-3 w-100" alt="Product Image" style="max-height: 180px; object-fit: contain;">
                         <h6 class="card-title text-dark fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h6>
                     </a>
 
@@ -101,13 +141,13 @@
                     <div class="price-container">
                         <div class="price-toggle">
                             <span class="size-btn active" data-size="M"
-                                  th:data-price="${#numbers.formatDecimal(product.priceM != null ? product.priceM : product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                  th:data-price="${#numbers.formatDecimal(product.priceM != null ? product.priceM : product.price, 0, 'POINT', 0, 'COMMA') + 'đ'}"
                                   onclick="updatePrice(this)">M</span>
                             <span class="size-btn" th:if="${product.priceL != null}" data-size="L"
-                                  th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'COMMA', 0, 'POINT') + 'đ'}"
+                                  th:data-price="${#numbers.formatDecimal(product.priceL, 0, 'POINT', 0, 'COMMA') + 'đ'}"
                                   onclick="updatePrice(this)">L</span>
                         </div>
-                        <p class="price text-success fw-bold h5 mb-3" th:text="${#numbers.formatDecimal(product.priceM != null ? product.priceM : product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</p>
+                        <p class="price text-success fw-bold h5 mb-3" th:text="${#numbers.formatDecimal(product.priceM != null ? product.priceM : product.price, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</p>
                     </div>
 
                     <form th:action="@{/cart/add}" method="post">
@@ -120,23 +160,33 @@
                 </div>
             </div>
         </div>
+        
+        <div class="text-center mt-5" th:if="${bestSellers != null and #lists.size(bestSellers) > 3}">
+            <button id="btn-view-more" class="btn btn-outline-success rounded-pill px-5 py-2 fw-bold shadow-sm" onclick="showMoreBestsellers()">
+                XEM THÊM SẢN PHẨM <i class="fas fa-chevron-down ms-2"></i>
+            </button>
+        </div>
     </div>
-
-
 
     <!-- News & Promotions Section -->
     <div class="container py-5 border-top">
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <h2 class="fw-bold m-0 section-title text-uppercase">Tin tức và Khuyến mãi</h2>
-            <a href="/promotions" class="text-success text-decoration-none fw-bold small">XEM THÊM <i class="fas fa-chevron-right ms-1"></i></a>
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h2 class="fw-bold m-0 section-title text-uppercase">Tin tức và Khuyến mãi</h2>
+                <div class="mt-2" style="width: 40px; height: 3px; background-color: var(--pl-green); border-radius: 2px;"></div>
+            </div>
+            <a href="/promotions" class="text-success text-decoration-none fw-bold small">XEM TẤT CẢ <i class="fas fa-arrow-right ms-2"></i></a>
         </div>
         <div class="row g-4">
             <div class="col-md-6" th:each="news : ${newsList}">
                 <div class="card border-0 shadow-sm overflow-hidden h-100 rounded-4 news-card">
-                    <img th:src="${news.imageUrl}" class="card-img-top" alt="News Image" style="height: 250px; object-fit: cover;">
-                    <div class="card-body p-4">
+                    <div class="overflow-hidden">
+                        <img th:src="${news.imageUrl}" class="card-img-top news-img" alt="News Image" style="height: 280px; object-fit: cover;">
+                    </div>
+                    <div class="card-body p-4 bg-white">
                         <h5 class="card-title text-dark fw-bold mb-3" th:text="${news.title}">Tiêu đề tin tức</h5>
-                        <p class="card-text text-muted small" th:text="${news.content}">Nội dung tóm tắt...</p>
+                        <p class="card-text text-muted small lh-lg" th:text="${news.content}">Nội dung tóm tắt...</p>
+                        <a th:href="@{'/news/' + ${news.id}}" class="btn btn-link text-success p-0 fw-bold text-decoration-none small mt-2">Xem chi tiết <i class="fas fa-plus ms-1" style="font-size: 0.7rem;"></i></a>
                     </div>
                 </div>
             </div>
@@ -144,8 +194,10 @@
     </div>
 
     <style>
-        .news-card { transition: 0.3s; }
-        .news-card:hover { transform: scale(1.02); }
+        .news-card { transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .news-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        .news-img { transition: 0.6s; }
+        .news-card:hover .news-img { transform: scale(1.1); }
     </style>
 
     <script>
@@ -155,15 +207,25 @@
             const priceText = element.getAttribute('data-price');
             const size = element.getAttribute('data-size');
             
-            // Update active state
             container.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
-            
-            // Update price display
             container.querySelector('.price').innerText = priceText;
-            
-            // Update hidden input in form
             card.querySelector('.selected-size').value = size;
+        }
+
+        function showMoreBestsellers() {
+            const hiddenItems = document.querySelectorAll('.bestseller-item.hidden');
+            hiddenItems.forEach((item, index) => {
+                if (index < 4) { // Show next 4 items or all
+                    item.classList.remove('hidden');
+                    item.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+            
+            const remainingHidden = document.querySelectorAll('.bestseller-item.hidden').length;
+            if (remainingHidden === 0) {
+                document.getElementById('btn-view-more').style.display = 'none';
+            }
         }
     </script>
 </div>

@@ -116,7 +116,7 @@
         <div class="col-5 text-end">
             <div class="info-label">Chương trình thành viên</div>
             <div class="mb-2">Hạng thẻ: <span class="membership-badge" th:text="${order.user.membershipRank}">SILVER</span></div>
-            <div class="mb-1">Điểm tích lũy: <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.user.points, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</span></div>
+            <div class="mb-1">Điểm tích lũy: <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.user.points, 0, 'POINT', 0, 'COMMA') + 'đ'}">0đ</span></div>
             <div class="small text-muted">Thanh toán: <span class="fw-bold text-dark" th:text="${order.paymentMethod}">BANK</span></div>
         </div>
     </div>
@@ -141,8 +141,8 @@
                     </div>
                 </td>
                 <td class="text-center" th:text="${item.quantity}">1</td>
-                <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
-                <td class="text-end pe-0 fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
+                <td class="text-end pe-0 fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</td>
             </tr>
         </tbody>
     </table>
@@ -153,15 +153,15 @@
             <div class="total-section">
                 <div class="d-flex justify-content-between mb-2">
                     <span class="text-muted">Tổng tiền hàng:</span>
-                    <span class="fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount + (order.discountAmount ?: 0) - (order.shippingFee ?: 0), 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                    <span class="fw-bold" th:text="${#numbers.formatDecimal(order.totalAmount + (order.discountAmount ?: 0) - (order.shippingFee ?: 0), 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2" th:if="${order.shippingFee > 0}">
                     <span class="text-muted">Phí giao hàng:</span>
-                    <span th:text="${'+' + #numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                    <span th:text="${'+' + #numbers.formatDecimal(order.shippingFee, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2 text-danger" th:if="${order.discountAmount > 0}">
                     <span>Giảm giá / Voucher:</span>
-                    <span th:text="${'-' + #numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">-0đ</span>
+                    <span th:text="${'-' + #numbers.formatDecimal(order.discountAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">-0đ</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span class="text-muted">Thuế VAT (10%):</span>
@@ -169,7 +169,7 @@
                 </div>
                 <div class="d-flex justify-content-between pt-3 border-top border-2">
                     <h5 class="fw-bold text-dark mb-0">TỔNG CỘNG:</h5>
-                    <h4 class="fw-bold text-success mb-0" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</h4>
+                    <h4 class="fw-bold text-success mb-0" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</h4>
                 </div>
             </div>
         </div>

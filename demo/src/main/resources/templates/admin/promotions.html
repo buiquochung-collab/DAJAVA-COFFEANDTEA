@@ -28,7 +28,7 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="display-6 fw-bold text-center mb-3" 
-                         th:text="${promo.discountType.name() == 'PERCENT' ? promo.discountValue + '%' : #numbers.formatDecimal(promo.discountValue, 0, 'COMMA', 0, 'POINT') + 'đ'}">
+                         th:text="${promo.discountType.name() == 'PERCENT' ? promo.discountValue + '%' : #numbers.formatDecimal(promo.discountValue, 0, 'POINT', 0, 'COMMA') + 'đ'}">
                         10%
                     </div>
                     <p class="text-muted small mb-4" th:text="${promo.description}">Description text here...</p>
