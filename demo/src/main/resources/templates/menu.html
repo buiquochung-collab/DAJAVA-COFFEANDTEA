@@ -62,10 +62,10 @@
                             <span th:if="${currentSort == null or currentSort == ''}">Mặc định</span>
                         </button>
                         <ul class="dropdown-menu border-0 shadow-sm rounded-4 mt-2">
-                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{''(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{''(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{''(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{''(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
                         </ul>
                     </div>
                 </div>
