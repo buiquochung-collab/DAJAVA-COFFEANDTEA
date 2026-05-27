@@ -65,7 +65,7 @@
                             <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
                         </ul>
                     </div>
                 </div>
