@@ -411,6 +411,12 @@ public class AdminController {
         } else {
             systemSettingService.updateSetting("maintenance_mode", "true", null, "GENERAL");
         }
+        
+        if (!allParams.containsKey("store_status")) {
+            systemSettingService.updateSetting("store_status", "CLOSED", null, "SYSTEM");
+        } else {
+            systemSettingService.updateSetting("store_status", "OPEN", null, "SYSTEM");
+        }
 
         ra.addFlashAttribute("successMessage", "Đã lưu tất cả cấu hình hệ thống");
         return "redirect:/admin/settings";

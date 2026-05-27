@@ -35,7 +35,13 @@
                         <div class="form-check form-switch mt-4">
                             <input class="form-check-input" type="checkbox" name="maintenance_mode" id="swMaintenance" th:checked="${settings['maintenance_mode'] == 'true'}">
                             <label class="form-check-label fw-bold" for="swMaintenance">Chế độ bảo trì hệ thống</label>
-                            <div class="form-text small">Khi bật, khách hàng sẽ thấy thông báo bảo trì và không thể thực hiện đặt hàng.</div>
+                            <div class="form-text small">Khi bật, khách hàng sẽ thấy thông báo bảo trì.</div>
+                        </div>
+                        
+                        <div class="form-check form-switch mt-3 pt-3 border-top">
+                            <input class="form-check-input bg-success" type="checkbox" name="store_status" id="swStore" th:checked="${settings['store_status'] == null or settings['store_status'] == 'OPEN'}">
+                            <label class="form-check-label fw-bold text-success" for="swStore">Trạng thái Cửa hàng (Mở/Đóng)</label>
+                            <div class="form-text small">Mặc định hệ thống tự động Đóng lúc 22:30 và Mở lúc 06:30. Bạn có thể tự gạt nút này để đóng/mở khẩn cấp để kiểm tra.</div>
                         </div>
                     </div>
                 </div>

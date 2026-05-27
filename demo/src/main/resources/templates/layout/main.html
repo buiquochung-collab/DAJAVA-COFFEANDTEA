@@ -337,6 +337,26 @@
     </div>
 </footer>
 
+<!-- Store Closed Modal -->
+<div class="modal fade" id="storeClosedModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-danger text-white border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-store-slash me-2"></i>Hệ thống đã đóng cửa</h5>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="display-1 text-danger opacity-50 mb-3"><i class="fas fa-moon"></i></div>
+                <h5 class="fw-bold mb-3">Xin lỗi quý khách!</h5>
+                <p class="text-muted mb-0">Giờ hoạt động của Tea & Coffee là từ <strong>06:30 đến 22:30</strong>.</p>
+                <p class="text-muted mt-2">Hiện tại hệ thống đã ngừng nhận đơn hàng để chốt ca. Quý khách vui lòng quay lại vào ngày mai nhé!</p>
+            </div>
+            <div class="modal-footer border-0 bg-light p-3 justify-content-center">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đã hiểu, tôi chỉ xem menu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Quick View Modal -->
 <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -430,6 +450,13 @@
 
     // Auto-hide toasts after 5 seconds
     document.addEventListener('DOMContentLoaded', function () {
+        /* Check store status injected by Thymeleaf */
+        var isStoreOpen = [[${@systemSettingService.isStoreOpen()}]];
+        if (isStoreOpen === false) {
+            var storeClosedModal = new bootstrap.Modal(document.getElementById('storeClosedModal'));
+            storeClosedModal.show();
+        }
+
         var toasts = document.querySelectorAll('.toast');
         toasts.forEach(function (toastEl) {
             var bsToast = new bootstrap.Toast(toastEl, { delay: 5000 });
