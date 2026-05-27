@@ -62,9 +62,9 @@
                             <span th:if="${currentSort == null or currentSort == ''}">Mặc định</span>
                         </button>
                         <ul class="dropdown-menu border-0 shadow-sm rounded-4 mt-2">
-                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
-                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
                             <li><a class="dropdown-item py-2" th:href="@{${#request.getRequestURI()}(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
                         </ul>
                     </div>
@@ -72,8 +72,15 @@
 
                 <div class="row g-4">
                     <div class="col-6 col-md-4 col-lg-4" th:each="product : ${products}">
-                        <div class="product-card text-center h-100 d-flex flex-column p-3 shadow-sm">
-                            <a th:href="@{'/product/' + ${product.id}}" class="text-decoration-none flex-grow-1">
+                        <div class="product-card text-center h-100 d-flex flex-column p-3 shadow-sm position-relative">
+                            <!-- Quick View Button -->
+                            <button class="btn btn-light rounded-circle shadow-sm position-absolute top-0 end-0 m-2 quick-view-btn" 
+                                    style="width: 35px; height: 35px; z-index: 10;" 
+                                    th:attr="data-id=${product.id}"
+                                    onclick="openQuickView(this)" title="Xem nhanh">
+                                <i class="fas fa-eye text-success"></i>
+                            </button>
+                            <a th:href="@{'/product/' + ${product.id}}" class="text-decoration-none flex-grow-1 mt-2">
                                 <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://phuclong.com.vn/uploads/dish/6620f4c93f0b35-trasuaphuclong.png'}" class="product-img mb-3" alt="Product Image" style="max-height: 180px; object-fit: contain;">
                                 <h6 class="card-title text-dark fw-bold" th:text="${product.name}">Tên sản phẩm</h6>
                             </a>
