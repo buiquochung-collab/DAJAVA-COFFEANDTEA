@@ -39,6 +39,7 @@ public class AdminController {
     @Autowired private com.example.demo.service.SystemSettingService systemSettingService;
     @Autowired private com.example.demo.repository.SystemSettingRepository systemSettingRepository;
     @Autowired private com.example.demo.repository.InventoryLogRepository inventoryLogRepository;
+    @Autowired private RevenueService revenueService;
 
     @GetMapping
     public String dashboard(Model model) {

@@ -36,6 +36,9 @@ public class CartController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.example.demo.service.SystemSettingService systemSettingService;
+
     private User getAuthenticatedUser(Authentication authentication) {
         if (authentication instanceof OAuth2AuthenticationToken) {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
