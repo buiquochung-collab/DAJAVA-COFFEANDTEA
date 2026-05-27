@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Báo cáo doanh thu | Tea & Coffee Admin</title>
+</head>
+<body>
+<div layout:fragment="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Báo cáo doanh thu thời gian thực</h2>
+        <div class="d-flex gap-2">
+            <form action="/admin/revenue" method="get" class="d-flex gap-2">
+                <input type="date" name="date" class="form-control rounded-pill" th:value="${selectedDate}" onchange="this.form.submit()">
+            </form>
+            <a th:href="@{'/admin/revenue/print?date=' + ${selectedDate}}" target="_blank" class="btn btn-secondary rounded-pill px-4 fw-bold shadow-sm">
+                <i class="fas fa-print me-2"></i>IN BÁO CÁO
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+                <div class="text-muted small fw-bold mb-2">TỔNG DOANH THU THỰC TẾ</div>
+                <h3 class="fw-bold text-success m-0" th:text="${#numbers.formatDecimal(report.grandTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+                <div class="text-muted small fw-bold mb-2">SỐ LƯỢNG HÓA ĐƠN</div>
+                <h3 class="fw-bold text-primary m-0" th:text="${report.orderCount}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+                <div class="text-muted small fw-bold mb-2">SỐ LƯỢNG SẢN PHẨM</div>
+                <h3 class="fw-bold text-warning m-0" th:text="${report.totalProductCount}">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+                <div class="text-muted small fw-bold mb-2">TỔNG TIỀN KHUYẾN MÃI</div>
+                <h3 class="fw-bold text-danger m-0" th:text="${#numbers.formatDecimal(report.promoTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Nguồn tiền -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-wallet text-success me-2"></i>Nguồn tiền thu về</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Tiền mặt (COD)</span>
+                        <span class="fw-bold" th:text="${#numbers.formatDecimal(report.cashTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Chuyển khoản (Bank/MoMo)</span>
+                        <span class="fw-bold" th:text="${#numbers.formatDecimal(report.transferTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom text-danger">
+                        <span>Giảm giá từ Voucher</span>
+                        <span class="fw-bold" th:text="'- ' + ${#numbers.formatDecimal(report.voucherTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-danger">
+                        <span>Trợ giá Khuyến mãi trực tiếp</span>
+                        <span class="fw-bold" th:text="'- ' + ${#numbers.formatDecimal(report.promoTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết sản phẩm -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-chart-pie text-warning me-2"></i>Phân bổ sản phẩm</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted"><i class="fas fa-coffee me-2 text-primary"></i>Nhóm Nước (Trà, Cà phê...)</span>
+                        <span class="fw-bold" th:text="${report.drinkCount} + ' ly'">0 ly</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted"><i class="fas fa-hamburger me-2 text-warning"></i>Nhóm Bánh ngọt & Mặn</span>
+                        <span class="fw-bold" th:text="${report.cakeCount} + ' cái'">0 cái</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

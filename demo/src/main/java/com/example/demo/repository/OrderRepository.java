@@ -20,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"orderDetails", "orderDetails.product"})
     @Override
     java.util.Optional<Order> findById(Long id);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"orderDetails", "orderDetails.product", "orderDetails.product.category"})
+    List<Order> findByOrderDateBetweenAndStatus(java.time.LocalDateTime start, java.time.LocalDateTime end, Order.OrderStatus status);
 }

@@ -236,6 +236,12 @@ public class CartController {
                                  HttpSession session,
                                  Authentication authentication,
                                  RedirectAttributes redirectAttributes) {
+        
+        if (!systemSettingService.isStoreOpen()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Hệ thống hiện đang đóng cửa (22:30 - 06:30). Vui lòng quay lại sau.");
+            return "redirect:/cart";
+        }
+
         User user = getAuthenticatedUser(authentication);
 
         List<CartItem> cartItems = getCartFromSession(session);

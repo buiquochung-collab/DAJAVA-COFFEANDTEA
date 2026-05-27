@@ -451,12 +451,25 @@ public class AdminController {
         return "redirect:/admin/recipes/" + productId;
     }
 
-    @GetMapping("/recipes/delete/{id}")
-    public String deleteRecipe(@PathVariable Long id, RedirectAttributes ra) {
-        Recipe recipe = recipeRepository.findById(id).orElseThrow();
-        Long productId = recipe.getProduct().getId();
-        recipeRepository.deleteById(id);
-        ra.addFlashAttribute("successMessage", "Đã xóa thành phần khỏi công thức");
-        return "redirect:/admin/recipes/" + productId;
+    // Revenue Management
+    @GetMapping("/revenue")
+    public String viewRevenue(@RequestParam(required = false) String date, Model model) {
+        java.time.LocalDate reportDate = (date != null && !date.isEmpty()) ? 
+            java.time.LocalDate.parse(date) : java.time.LocalDate.now();
+            
+        com.example.demo.dto.RevenueReportDTO report = revenueService.generateDailyReport(reportDate);
+        model.addAttribute("report", report);
+        model.addAttribute("selectedDate", reportDate);
+        return "admin/revenue";
+    }
+
+    @GetMapping("/revenue/print")
+    public String printRevenue(@RequestParam(required = false) String date, Model model) {
+        java.time.LocalDate reportDate = (date != null && !date.isEmpty()) ? 
+            java.time.LocalDate.parse(date) : java.time.LocalDate.now();
+            
+        com.example.demo.dto.RevenueReportDTO report = revenueService.generateDailyReport(reportDate);
+        model.addAttribute("report", report);
+        return "admin/revenue-print";
     }
 }

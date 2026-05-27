@@ -32,4 +32,10 @@ public class SystemSettingService {
     public String getAddress() { return getSetting("address", "Hồ Chí Minh, Việt Nam"); }
     public boolean isMaintenanceMode() { return "true".equals(getSetting("maintenance_mode", "false")); }
     public double getPointRate() { return Double.parseDouble(getSetting("point_rate", "10000")); }
+    
+    // Store Status
+    public boolean isStoreOpen() { return "OPEN".equals(getSetting("store_status", "OPEN")); }
+    public void setStoreStatus(boolean isOpen) {
+        updateSetting("store_status", isOpen ? "OPEN" : "CLOSED", "Trạng thái đóng/mở cửa của hệ thống", "SYSTEM");
+    }
 }
