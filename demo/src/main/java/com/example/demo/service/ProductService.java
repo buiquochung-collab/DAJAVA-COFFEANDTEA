@@ -41,6 +41,35 @@ public class ProductService {
         return products;
     }
 
+    public List<Product> sortProducts(List<Product> products, String sort) {
+        if (sort == null || sort.isEmpty()) return products;
+        
+        java.util.Comparator<Product> comparator = null;
+        switch (sort) {
+            case "price_asc":
+                comparator = java.util.Comparator.comparing(Product::getSalePrice);
+                break;
+            case "price_desc":
+                comparator = java.util.Comparator.comparing(Product::getSalePrice).reversed();
+                break;
+            case "popularity":
+                // Bestseller first, then by ID desc
+                comparator = (p1, p2) -> {
+                    boolean isB1 = Boolean.TRUE.equals(p1.getBestSeller());
+                    boolean isB2 = Boolean.TRUE.equals(p2.getBestSeller());
+                    if (isB1 && !isB2) return -1;
+                    if (!isB1 && isB2) return 1;
+                    return p2.getId().compareTo(p1.getId());
+                };
+                break;
+        }
+        
+        if (comparator != null) {
+            products.sort(comparator);
+        }
+        return products;
+    }
+
     public List<Product> searchProducts(String query) {
         if (query == null || query.isEmpty()) return getAllProducts();
         

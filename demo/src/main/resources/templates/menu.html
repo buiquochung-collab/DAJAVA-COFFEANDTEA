@@ -51,9 +51,23 @@
 
             <!-- Product Display Area -->
             <div class="col-lg-9">
-                <div class="text-center mb-5">
-                    <h3 class="fw-bold section-title text-uppercase" th:text="${query != null ? 'Kết quả tìm kiếm: ' + query : (selectedCategory != null ? selectedCategory.name : 'TẤT CẢ MENU')}">MENU</h3>
-                    <div class="mx-auto mt-2" style="width: 60px; height: 3px; background-color: var(--pl-green);"></div>
+                <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+                    <h3 class="fw-bold section-title text-uppercase m-0" th:text="${query != null ? 'Kết quả tìm kiếm: ' + query : (selectedCategory != null ? selectedCategory.name : 'TẤT CẢ MENU')}">MENU</h3>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-success dropdown-toggle rounded-pill px-4 fw-bold shadow-sm" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort me-2"></i>Sắp xếp: 
+                            <span th:if="${currentSort == 'price_asc'}">Giá thấp đến cao</span>
+                            <span th:if="${currentSort == 'price_desc'}">Giá cao đến thấp</span>
+                            <span th:if="${currentSort == 'popularity'}">Phổ biến nhất</span>
+                            <span th:if="${currentSort == null or currentSort == ''}">Mặc định</span>
+                        </button>
+                        <ul class="dropdown-menu border-0 shadow-sm rounded-4 mt-2">
+                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='', query=${query})}" th:classappend="${currentSort == null or currentSort == '' ? 'active bg-success text-white fw-bold' : ''}">Mặc định</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='popularity', query=${query})}" th:classappend="${currentSort == 'popularity' ? 'active bg-success text-white fw-bold' : ''}">Phổ biến nhất</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='price_asc', query=${query})}" th:classappend="${currentSort == 'price_asc' ? 'active bg-success text-white fw-bold' : ''}">Giá thấp đến cao</a></li>
+                            <li><a class="dropdown-item py-2" th:href="@{${#httpServletRequest.requestURI}(sort='price_desc', query=${query})}" th:classappend="${currentSort == 'price_desc' ? 'active bg-success text-white fw-bold' : ''}">Giá cao đến thấp</a></li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="row g-4">

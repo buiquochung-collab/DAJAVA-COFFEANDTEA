@@ -337,8 +337,97 @@
     </div>
 </footer>
 
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pb-0 position-absolute top-0 end-0" style="z-index: 10;">
+                <button type="button" class="btn-close bg-white rounded-circle p-2 m-3 shadow-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-5 bg-light d-flex align-items-center justify-content-center p-4">
+                        <img src="" id="qv-image" class="img-fluid" style="max-height: 300px; object-fit: contain;">
+                    </div>
+                    <div class="col-md-7 p-4 p-md-5">
+                        <span class="badge bg-success-subtle text-success rounded-pill mb-2" id="qv-category">Danh mục</span>
+                        <h4 class="fw-bold mb-2" id="qv-name">Tên sản phẩm</h4>
+                        <h4 class="text-success fw-bold mb-4" id="qv-price">0đ</h4>
+                        <p class="text-muted small mb-4 lh-lg" id="qv-desc">Mô tả sản phẩm...</p>
+                        
+                        <form action="/cart/add" method="post" id="qv-form">
+                            <input type="hidden" name="productId" id="qv-id">
+                            <div class="mb-4" id="qv-size-selector">
+                                <label class="fw-bold small mb-2 d-block">Chọn Size</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="size" id="qv-size-m" value="M" checked>
+                                    <label class="btn btn-outline-success" for="qv-size-m" id="qv-label-m">Size M</label>
+                                    
+                                    <input type="radio" class="btn-check" name="size" id="qv-size-l" value="L">
+                                    <label class="btn btn-outline-success" for="qv-size-l" id="qv-label-l">Size L</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 rounded-pill py-3 fw-bold shadow-sm" id="qv-submit">
+                                THÊM VÀO GIỎ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function openQuickView(btn) {
+        event.preventDefault();
+        const id = btn.getAttribute('data-id');
+        fetch('/api/products/' + id)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('qv-id').value = data.id;
+                document.getElementById('qv-name').innerText = data.name;
+                document.getElementById('qv-desc').innerText = data.description || 'Chưa có mô tả chi tiết.';
+                document.getElementById('qv-image').src = data.imageUrl || '/uploads/products/default.png';
+                if (data.category) document.getElementById('qv-category').innerText = data.category.name;
+                
+                const fmt = new Intl.NumberFormat('vi-VN');
+                document.getElementById('qv-price').innerText = fmt.format(data.salePrice) + 'đ';
+                
+                const sizeSelector = document.getElementById('qv-size-selector');
+                const sizeM = document.getElementById('qv-size-m');
+                const sizeL = document.getElementById('qv-size-l');
+                const labelM = document.getElementById('qv-label-m');
+                const labelL = document.getElementById('qv-label-l');
+                
+                if (data.priceL != null && data.priceM != null) {
+                    sizeSelector.style.display = 'block';
+                    labelM.innerText = 'Size M (+0đ)';
+                    const diff = data.priceL - data.priceM;
+                    labelL.innerText = 'Size L (+' + fmt.format(diff) + 'đ)';
+                    sizeL.disabled = false;
+                } else {
+                    sizeSelector.style.display = 'none';
+                    sizeM.checked = true;
+                }
+                
+                const submitBtn = document.getElementById('qv-submit');
+                if (data.calculatedStock !== undefined && data.calculatedStock <= 0) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = 'TẠM HẾT HÀNG';
+                    submitBtn.classList.replace('btn-success', 'btn-secondary');
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'THÊM VÀO GIỎ';
+                    submitBtn.classList.replace('btn-secondary', 'btn-success');
+                }
+                
+                new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+            })
+            .catch(err => console.error('Error fetching product details:', err));
+    }
+
     // Auto-hide toasts after 5 seconds
     document.addEventListener('DOMContentLoaded', function () {
         var toasts = document.querySelectorAll('.toast');

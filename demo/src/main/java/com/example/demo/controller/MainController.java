@@ -38,9 +38,12 @@ public class MainController {
     }
 
     @GetMapping("/menu")
-    public String menu(Model model) {
-        model.addAttribute("products", productService.getAllProducts());
+    public String menu(@RequestParam(required = false) String sort, Model model) {
+        List<Product> products = productService.getAllProducts();
+        products = productService.sortProducts(products, sort);
+        model.addAttribute("products", products);
         model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("currentSort", sort);
         return "menu";
     }
 
@@ -53,12 +56,14 @@ public class MainController {
     }
 
     @GetMapping("/category/{id}")
-    public String categoryFilter(@PathVariable Long id, Model model) {
+    public String categoryFilter(@PathVariable Long id, @RequestParam(required = false) String sort, Model model) {
         Category category = categoryService.getCategoryById(id);
         List<Product> products = productService.getProductsByCategory(category);
+        products = productService.sortProducts(products, sort);
         model.addAttribute("products", products);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("currentSort", sort);
         return "menu";
     }
 
